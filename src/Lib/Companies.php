@@ -7,12 +7,12 @@ use Larafocus\Api;
 
 class Companies extends Api
 {
-    public function list(array $parameters = [], int $offset = 0): Response
+    public function list(int $offset = 0): Response
     {
         return $this->http()
             ->useMasterKey()
             ->environment('production')
-            ->get('/empresas', array_merge($parameters, ['offset' => $offset]));
+            ->get('/empresas', ['offset' => $offset]);
     }
 
     public function create(array $parameters = []): Response
