@@ -80,10 +80,10 @@ class Http
             ->patch($uri, $parameters);
     }
 
-    public function delete(string $uri): Response
+    public function delete(string $uri, array $parameters = []): Response
     {
         return HttpClient::focus($this->environment, $this->useMasterKey)
             ->timeout($this->timeout)
-            ->delete($uri);
+            ->delete($uri, $parameters);
     }
 }

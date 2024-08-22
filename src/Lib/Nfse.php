@@ -17,9 +17,9 @@ class Nfse extends Api
         return $this->http()->get('/nfse/'.$reference);
     }
 
-    public function cancel(string $reference): Response
+    public function cancel(string $reference, array $parameters = []): Response
     {
-        return $this->http()->delete('/nfse/'.$reference);
+        return $this->http()->delete('/nfse/'.$reference, $parameters);
     }
 
     public function email(string $reference, array $parameters = []): Response
