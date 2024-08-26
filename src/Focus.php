@@ -12,6 +12,7 @@ class Focus
     public static int $timeout = 60;
     public static ?string $environment = null;
     public static bool $useMasterKey = false;
+    public static ?string $token = null;
 
     public static function timeout(int $timeoutInSeconds = 60): static
     {
@@ -34,6 +35,13 @@ class Focus
         return new static;
     }
 
+    public static function token(string $token): static
+    {
+        self::$token = $token;
+
+        return new static;
+    }
+
     public static function getEnv(): ?string
     {
         return self::$environment ?: config('larafocus.environment');
@@ -48,6 +56,7 @@ class Focus
     {
         return (new Nfse())
             ->useMasterKey(self::$useMasterKey)
+            ->token(self::$token)
             ->environment(self::$environment)
             ->timeout(self::$timeout);
     }
@@ -56,6 +65,7 @@ class Focus
     {
         return (new Hooks())
             ->useMasterKey(self::$useMasterKey)
+            ->token(self::$token)
             ->environment(self::$environment)
             ->timeout(self::$timeout);
     }
@@ -64,6 +74,7 @@ class Focus
     {
         return (new Search())
             ->useMasterKey(self::$useMasterKey)
+            ->token(self::$token)
             ->environment(self::$environment)
             ->timeout(self::$timeout);
     }
@@ -72,6 +83,7 @@ class Focus
     {
         return (new Companies())
             ->useMasterKey(self::$useMasterKey)
+            ->token(self::$token)
             ->environment(self::$environment)
             ->timeout(self::$timeout);
     }

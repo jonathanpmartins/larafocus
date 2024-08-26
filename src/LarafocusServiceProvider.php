@@ -15,7 +15,11 @@ class LarafocusServiceProvider extends ServiceProvider
             __DIR__.'/../config/larafocus.php' => config_path('larafocus.php'),
         ]);
 
-        Http::macro('focus', function (string $environment = null, bool $useMasterKey = false)
+        Http::macro('focus', function (
+            string $environment = null,
+            bool $useMasterKey = false,
+            ?string $token = null,
+        )
         {
             $environment = $environment ?: config('larafocus.environment');
             if ($useMasterKey)
@@ -24,7 +28,7 @@ class LarafocusServiceProvider extends ServiceProvider
             }
             else
             {
-                $token = base64_encode(config('larafocus.'.$environment.'.token'));
+                $token = base64_encode($token ?: config('larafocus.'.$environment.'.token'));
             }
             $endpoint = config('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
 
@@ -34,10 +38,10 @@ class LarafocusServiceProvider extends ServiceProvider
                 ->baseUrl($endpoint);
         });
 
-        Http::macro('focusXml', function (string $environment = null)
+        Http::macro('focusXml', function (string $environment = null, ?string $token = null)
         {
             $environment = $environment ?: config('larafocus.environment');
-            $token = base64_encode(config('larafocus.'.$environment.'.token'));
+            $token = base64_encode($token ?: config('larafocus.'.$environment.'.token'));
             $endpoint = config('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
 
             return Http::withToken($token, 'Basic')
@@ -46,10 +50,10 @@ class LarafocusServiceProvider extends ServiceProvider
                 ->baseUrl($endpoint);
         });
 
-        Http::macro('focusPdf', function (string $environment = null)
+        Http::macro('focusPdf', function (string $environment = null, ?string $token = null)
         {
             $environment = $environment ?: config('larafocus.environment');
-            $token = base64_encode(config('larafocus.'.$environment.'.token'));
+            $token = base64_encode($token ?: config('larafocus.'.$environment.'.token'));
             $endpoint = config('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
 
             return Http::withToken($token, 'Basic')

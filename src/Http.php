@@ -12,6 +12,7 @@ class Http
     private int $timeout = 60;
     private ?string $environment = null;
     private bool $useMasterKey = false;
+    private ?string $token = null;
 
     public function timeout(int $timeout): static
     {
@@ -34,6 +35,13 @@ class Http
         return $this;
     }
 
+    public function token(?string $token): static
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
     public function isXml(): static
     {
         $this->isXml = true;
@@ -52,15 +60,27 @@ class Http
     {
         if ($this->isXml)
         {
-            $client = HttpClient::focusXml($this->environment)->timeout($this->timeout);
+            $client = HttpClient::focusXml(
+                environment: $this->environment,
+                // useMasterKey: $this->useMasterKey,
+                token: $this->token,
+            )->timeout($this->timeout);
         }
         else if ($this->isPdf)
         {
-            $client = HttpClient::focusPdf($this->environment)->timeout($this->timeout);
+            $client = HttpClient::focusPdf(
+                environment: $this->environment,
+                // useMasterKey: $this->useMasterKey,
+                token: $this->token,
+            )->timeout($this->timeout);
         }
         else
         {
-            $client = HttpClient::focus($this->environment, $this->useMasterKey)->timeout($this->timeout);
+            $client = HttpClient::focus(
+                environment: $this->environment,
+                useMasterKey: $this->useMasterKey,
+                token: $this->token,
+            )->timeout($this->timeout);
         }
 
         return $client->get($uri, $parameters);

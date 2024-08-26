@@ -12,6 +12,7 @@ class Api
     protected int $timeout = 60;
     protected ?string $environment = null;
     protected bool $useMasterKey = false;
+    protected ?string $token = null;
 
     public function timeout(int $timeoutInSeconds = 60): static
     {
@@ -34,10 +35,18 @@ class Api
         return $this;
     }
 
+    public function token(?string $token): static
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
     protected function http(): Http
     {
         return (new Http())
             ->useMasterKey($this->useMasterKey)
+            ->token($this->token)
             ->environment($this->environment)
             ->timeout($this->timeout);
     }
