@@ -26,13 +26,14 @@ class LarafocusServiceProvider extends ServiceProvider
             {
                 if ($useMasterKey)
                 {
-                    $token = base64_encode(config('larafocus.master_token'));
+                    $token = config('larafocus.master_token');
                 }
                 else
                 {
-                    $token = base64_encode(config('larafocus.'.$environment.'.token'));
+                    $token = config('larafocus.'.$environment.'.token');
                 }
             }
+            $token = base64_encode($token);
             $endpoint = config('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
 
             return Http::withToken($token, 'Basic')
