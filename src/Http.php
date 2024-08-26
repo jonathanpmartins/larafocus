@@ -88,21 +88,33 @@ class Http
 
     public function post(string $uri, array $parameters = []): Response
     {
-        return HttpClient::focus($this->environment, $this->useMasterKey)
+        return HttpClient::focus(
+            environment: $this->environment,
+            useMasterKey: $this->useMasterKey,
+            token: $this->token,
+        )
             ->timeout($this->timeout)
             ->post($uri, $parameters);
     }
 
     public function patch(string $uri, array $parameters = []): Response
     {
-        return HttpClient::focus($this->environment, $this->useMasterKey)
+        return HttpClient::focus(
+            environment: $this->environment,
+            useMasterKey: $this->useMasterKey,
+            token: $this->token,
+        )
             ->timeout($this->timeout)
             ->patch($uri, $parameters);
     }
 
     public function delete(string $uri, array $parameters = []): Response
     {
-        return HttpClient::focus($this->environment, $this->useMasterKey)
+        return HttpClient::focus(
+            environment: $this->environment,
+            useMasterKey: $this->useMasterKey,
+            token: $this->token,
+        )
             ->timeout($this->timeout)
             ->delete($uri, $parameters);
     }
