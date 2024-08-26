@@ -22,13 +22,16 @@ class LarafocusServiceProvider extends ServiceProvider
         )
         {
             $environment = $environment ?: config('larafocus.environment');
-            if ($useMasterKey)
+            if (! $token)
             {
-                $token = base64_encode(config('larafocus.master_token'));
-            }
-            else
-            {
-                $token = base64_encode($token ?: config('larafocus.'.$environment.'.token'));
+                if ($useMasterKey)
+                {
+                    $token = base64_encode(config('larafocus.master_token'));
+                }
+                else
+                {
+                    $token = base64_encode(config('larafocus.'.$environment.'.token'));
+                }
             }
             $endpoint = config('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
 
