@@ -62,7 +62,7 @@ class Focus
             ->timeout(self::$timeout);
     }
 
-    public static function nfsen(): Nfse
+    public static function nfsen(): Nfsen
     {
         return (new Nfsen())
             ->useMasterKey(self::$useMasterKey)
