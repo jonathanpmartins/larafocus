@@ -6,6 +6,7 @@ use Larafocus\Lib\Companies;
 use Larafocus\Lib\Hooks;
 use Larafocus\Lib\Search;
 use Larafocus\Lib\Nfse;
+use Larafocus\Lib\Nfsen;
 
 class Focus
 {
@@ -55,6 +56,15 @@ class Focus
     public static function nfse(): Nfse
     {
         return (new Nfse())
+            ->useMasterKey(self::$useMasterKey)
+            ->token(self::$token)
+            ->environment(self::$environment)
+            ->timeout(self::$timeout);
+    }
+
+    public static function nfsen(): Nfse
+    {
+        return (new Nfsen())
             ->useMasterKey(self::$useMasterKey)
             ->token(self::$token)
             ->environment(self::$environment)
