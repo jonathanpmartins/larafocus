@@ -213,7 +213,7 @@ paths:
                 $ref: '#/components/schemas/Erro'
               example:
                 codigo: nao_encontrado
-                mensagem: Empresa não encontrado
+                mensagem: Empresa não encontrada
         '422':
           description: O servidor entendeu a requisição, mas os dados são inválidos ou não podem ser processados
           content:
