@@ -49,7 +49,7 @@ class Api
 
     protected function http(): Http
     {
-        return (new Http())
+        return (new Http)
             ->useMasterKey($this->useMasterKey)
             ->token($this->token)
             ->environment($this->environment)
@@ -57,8 +57,8 @@ class Api
     }
 
     /**
-     * @param array<string, mixed> $parameters
-     * @param array<string, mixed> $validation
+     * @param  array<string, mixed>  $parameters
+     * @param  array<string, mixed>  $validation
      * @return Response|array<string, mixed>
      */
     protected function validate(array $parameters, array $validation): Response|array
@@ -67,9 +67,7 @@ class Api
 
         try {
             $data = $validator->validated();
-        }
-        catch (ValidationException $validationException)
-        {
+        } catch (ValidationException $validationException) {
             return $this->failedValidationResponse($validationException, $validator);
         }
 

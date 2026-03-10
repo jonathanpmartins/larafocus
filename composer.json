@@ -33,7 +33,8 @@
         "phpstan/phpstan": "^2.1",
         "larastan/larastan": "^3.9",
         "rector/rector": "^2.3",
-        "driftingly/rector-laravel": "^2.1"
+        "driftingly/rector-laravel": "^2.1",
+        "laravel/pint": "^1.27"
     },
     "config": {
         "allow-plugins": {

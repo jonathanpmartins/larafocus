@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http AS HttpClient;
+use Illuminate\Support\Facades\Http as HttpClient;
 
 class Http
 {
@@ -78,8 +78,7 @@ class Http
                 // useMasterKey: $this->useMasterKey,
                 token: $this->token,
             )->timeout($this->timeout);
-        } else
-        {
+        } else {
             $client = HttpClient::focus(
                 environment: $this->environment,
                 useMasterKey: $this->useMasterKey,

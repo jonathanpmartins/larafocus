@@ -2,8 +2,7 @@
 
 use Larafocus\Focus;
 
-test('list method', function ()
-{
+test('list method', function () {
     $response = Focus::search()
         ->cities()
         ->taxCodesFor('ibge-code')
@@ -12,8 +11,7 @@ test('list method', function ()
     $this->assertRequest('GET', '/municipios/ibge-code/codigos_tributarios_municipio', $response);
 });
 
-test('get method', function ()
-{
+test('get method', function () {
     $response = Focus::search()
         ->cities()
         ->taxCodesFor('ibge-code')

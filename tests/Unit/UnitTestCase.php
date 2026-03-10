@@ -6,9 +6,9 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
+use Larafocus\LarafocusServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as BaseTestCase;
-use Larafocus\LarafocusServiceProvider;
 
 class UnitTestCase extends BaseTestCase
 {
@@ -38,14 +38,12 @@ class UnitTestCase extends BaseTestCase
 
     public function assertRequest(string $method, string $path, Response $response): void
     {
-        Http::assertSent(function (Request $request) use ($method, $path)
-        {
+        Http::assertSent(function (Request $request) use ($method, $path) {
             return $request->method() == $method && str_contains($request->url(), $path);
         });
 
-        if (str_contains($path, '?'))
-        {
-            list($path, $query) = explode('?', $path, 2);
+        if (str_contains($path, '?')) {
+            [$path, $query] = explode('?', $path, 2);
 
             $this->assertSame(
                 $query,
@@ -61,8 +59,7 @@ class UnitTestCase extends BaseTestCase
 
     public function assertRequestNotSent(string $method, string $path): void
     {
-        Http::assertNotSent(function (Request $request) use ($method, $path)
-        {
+        Http::assertNotSent(function (Request $request) use ($method, $path) {
             return $request->method() == $method && str_contains($request->url(), $path);
         });
     }
@@ -89,7 +86,7 @@ class UnitTestCase extends BaseTestCase
                 [
                     'attribute' => str($invalidField)
                         ->snake()
-                        ->replace('_', ' ')
+                        ->replace('_', ' '),
                 ],
                 $errorParams,
             )

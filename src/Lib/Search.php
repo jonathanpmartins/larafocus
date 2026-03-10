@@ -11,7 +11,7 @@ class Search extends Api
 {
     public function cities(): Cities
     {
-        return (new Cities())
+        return (new Cities)
             ->useMasterKey($this->useMasterKey)
             ->environment($this->environment)
             ->timeout($this->timeout);

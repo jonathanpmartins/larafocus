@@ -24,17 +24,12 @@ class ValidationRuleTransformer
     {
         $this->output = [];
 
-        foreach ($this->rules as $key => $validation)
-        {
-            if (str_contains($validation, '|'))
-            {
-                foreach (explode('|', $validation) as $exploded)
-                {
+        foreach ($this->rules as $key => $validation) {
+            if (str_contains($validation, '|')) {
+                foreach (explode('|', $validation) as $exploded) {
                     $this->transformValidation($exploded, $key);
                 }
-            }
-            else
-            {
+            } else {
                 $this->transformValidation($validation, $key);
             }
         }
@@ -46,26 +41,22 @@ class ValidationRuleTransformer
     {
         $other = null;
 
-        if (str_contains($validation, ':'))
-        {
+        if (str_contains($validation, ':')) {
             $exploded = explode(':', $validation);
             $validation = $exploded[0];
 
-            if ($validation == 'date_format')
-            {
+            if ($validation == 'date_format') {
                 $other = $exploded[1];
             }
 
-            if ($validation == 'max')
-            {
+            if ($validation == 'max') {
                 $other = $exploded[1];
             }
         }
 
         $array = null;
 
-        switch ($validation)
-        {
+        switch ($validation) {
             case 'email':
             case 'array':
             case 'boolean':
@@ -92,8 +83,7 @@ class ValidationRuleTransformer
                 break;
         }
 
-        if ($array)
-        {
+        if ($array) {
             $this->output[] = $array;
         }
     }

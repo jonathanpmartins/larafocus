@@ -6,9 +6,9 @@ namespace Larafocus;
 
 use Larafocus\Lib\Companies;
 use Larafocus\Lib\Hooks;
-use Larafocus\Lib\Search;
 use Larafocus\Lib\Nfse;
 use Larafocus\Lib\Nfsen;
+use Larafocus\Lib\Search;
 
 class Focus
 {
@@ -24,28 +24,28 @@ class Focus
     {
         self::$timeout = $timeoutInSeconds;
 
-        return new self();
+        return new self;
     }
 
     public static function environment(?string $environment = null): self
     {
         self::$environment = $environment;
 
-        return new self();
+        return new self;
     }
 
     public static function useMasterKey(bool $isTrue = true): self
     {
         self::$useMasterKey = $isTrue;
 
-        return new self();
+        return new self;
     }
 
     public static function token(string $token): self
     {
         self::$token = $token;
 
-        return new self();
+        return new self;
     }
 
     public static function getEnv(): string
@@ -60,7 +60,7 @@ class Focus
 
     public static function nfse(): Nfse
     {
-        return (new Nfse())
+        return (new Nfse)
             ->useMasterKey(self::$useMasterKey)
             ->token(self::$token)
             ->environment(self::$environment)
@@ -69,7 +69,7 @@ class Focus
 
     public static function nfsen(): Nfsen
     {
-        return (new Nfsen())
+        return (new Nfsen)
             ->useMasterKey(self::$useMasterKey)
             ->token(self::$token)
             ->environment(self::$environment)
@@ -78,7 +78,7 @@ class Focus
 
     public static function hooks(): Hooks
     {
-        return (new Hooks())
+        return (new Hooks)
             ->useMasterKey(self::$useMasterKey)
             ->token(self::$token)
             ->environment(self::$environment)
@@ -87,7 +87,7 @@ class Focus
 
     public static function search(): Search
     {
-        return (new Search())
+        return (new Search)
             ->useMasterKey(self::$useMasterKey)
             ->token(self::$token)
             ->environment(self::$environment)
@@ -96,7 +96,7 @@ class Focus
 
     public static function companies(): Companies
     {
-        return (new Companies())
+        return (new Companies)
             ->useMasterKey(self::$useMasterKey)
             ->token(self::$token)
             ->environment(self::$environment)

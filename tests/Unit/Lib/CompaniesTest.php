@@ -2,8 +2,7 @@
 
 use Larafocus\Focus;
 
-test('list method', function ()
-{
+test('list method', function () {
     $response = Focus::companies()->list();
     $this->assertRequest('GET', '/empresas', $response);
 
@@ -11,8 +10,7 @@ test('list method', function ()
     $this->assertRequest('GET', '/empresas?offset=10', $response);
 });
 
-test('create method', function ()
-{
+test('create method', function () {
     $response = Focus::companies()->environment('production')->create();
     $this->assertRequest('POST', '/empresas', $response);
 
@@ -20,15 +18,13 @@ test('create method', function ()
     $this->assertRequest('POST', '/empresas?dry_run=1', $response);
 });
 
-test('get method', function ()
-{
+test('get method', function () {
     $response = Focus::companies()->get('company-id');
 
     $this->assertRequest('GET', '/empresas/company-id', $response);
 });
 
-test('update method', function ()
-{
+test('update method', function () {
     $response = Focus::companies()
         ->environment('production')
         ->update('company-id');
@@ -42,8 +38,7 @@ test('update method', function ()
     $this->assertRequest('PATCH', '/empresas?dry_run=1', $response);
 });
 
-test('delete method', function ()
-{
+test('delete method', function () {
     $response = Focus::companies()->delete('company-id');
 
     $this->assertRequest('DELETE', '/empresas/company-id', $response);
