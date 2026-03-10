@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Larafocus;
 
 use Illuminate\Support\ServiceProvider;
@@ -33,6 +35,7 @@ class LarafocusServiceProvider extends ServiceProvider
                     $token = config()->string('larafocus.'.$environment.'.token', '');
                 }
             }
+
             $token = base64_encode($token);
             $endpoint = config()->string('larafocus.'.$environment.'.endpoint', '').LarafocusServiceProvider::$prefix;
 
@@ -73,9 +76,6 @@ class LarafocusServiceProvider extends ServiceProvider
             __DIR__.'/../config/larafocus.php', 'larafocus'
         );
 
-        $this->app->singleton(Focus::class, function()
-        {
-            return new Focus();
-        });
+        $this->app->singleton(Focus::class, fn(): Focus => new Focus());
     }
 }

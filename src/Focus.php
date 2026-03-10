@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Larafocus;
 
 use Larafocus\Lib\Companies;
@@ -11,8 +13,11 @@ use Larafocus\Lib\Nfsen;
 class Focus
 {
     public static int $timeout = 60;
+
     public static ?string $environment = null;
+
     public static bool $useMasterKey = false;
+
     public static ?string $token = null;
 
     public static function timeout(int $timeoutInSeconds = 60): self

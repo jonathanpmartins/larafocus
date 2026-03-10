@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Larafocus\Lib\Search;
 
 use Illuminate\Http\Client\Response;

@@ -31,7 +31,9 @@
         "orchestra/testbench": "^10.0",
         "vlucas/phpdotenv": "^5.6",
         "phpstan/phpstan": "^2.1",
-        "larastan/larastan": "^3.9"
+        "larastan/larastan": "^3.9",
+        "rector/rector": "^2.3",
+        "driftingly/rector-laravel": "^2.1"
     },
     "config": {
         "allow-plugins": {

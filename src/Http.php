@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
@@ -8,10 +10,15 @@ use Illuminate\Support\Facades\Http AS HttpClient;
 class Http
 {
     private bool $isXml = false;
+
     private bool $isPdf = false;
+
     private int $timeout = 60;
+
     private ?string $environment = null;
+
     private bool $useMasterKey = false;
+
     private ?string $token = null;
 
     public function timeout(int $timeout): static
@@ -59,23 +66,19 @@ class Http
     /** @param array<string, mixed> $parameters */
     public function get(string $uri, array $parameters = []): Response
     {
-        if ($this->isXml)
-        {
+        if ($this->isXml) {
             $client = HttpClient::focusXml(
                 environment: $this->environment,
                 // useMasterKey: $this->useMasterKey,
                 token: $this->token,
             )->timeout($this->timeout);
-        }
-        else if ($this->isPdf)
-        {
+        } elseif ($this->isPdf) {
             $client = HttpClient::focusPdf(
                 environment: $this->environment,
                 // useMasterKey: $this->useMasterKey,
                 token: $this->token,
             )->timeout($this->timeout);
-        }
-        else
+        } else
         {
             $client = HttpClient::focus(
                 environment: $this->environment,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Larafocus;
 
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
@@ -10,8 +12,11 @@ use Illuminate\Validation\Validator;
 class Api
 {
     protected int $timeout = 60;
+
     protected ?string $environment = null;
+
     protected bool $useMasterKey = false;
+
     protected ?string $token = null;
 
     public function timeout(int $timeoutInSeconds = 60): static
@@ -63,21 +68,21 @@ class Api
         try {
             $data = $validator->validated();
         }
-        catch (ValidationException $exception)
+        catch (ValidationException $validationException)
         {
-            return $this->failedValidationResponse($exception, $validator);
+            return $this->failedValidationResponse($validationException, $validator);
         }
 
         return $data;
     }
 
-    protected function failedValidationResponse(ValidationException $exception, Validator $validator): Response
+    protected function failedValidationResponse(ValidationException $validationException, Validator $validator): Response
     {
         return new Response(new GuzzleResponse(
             422,
             ['Content-Type' => 'application/json'],
             (string) json_encode([
-                'message' => $exception->getMessage(),
+                'message' => $validationException->getMessage(),
                 'errors' => $validator->errors()->toArray(),
             ])
         ));

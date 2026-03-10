@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Larafocus\Lib\Search\Cities;
 
 use Illuminate\Http\Client\Response;
@@ -7,11 +9,8 @@ use Larafocus\Api;
 
 class Services extends Api
 {
-    protected string $cityCode;
-
-    public function __construct(string $cityCode)
+    public function __construct(protected string $cityCode)
     {
-        $this->cityCode = $cityCode;
     }
 
     /** @param array<string, mixed> $parameters */
