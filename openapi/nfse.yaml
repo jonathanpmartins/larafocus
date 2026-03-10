@@ -1,0 +1,808 @@
+openapi: 3.0.3
+
+info:
+  title: FocusNFe API - NFSe
+  description: |
+    Endpoints para emissão, consulta, cancelamento e gerenciamento de
+    Notas Fiscais de Serviço Eletrônicas (NFSe).
+  version: 2.0.0
+  contact:
+    name: FocusNFe
+    url: https://focusnfe.com.br
+
+servers:
+  - url: https://api.focusnfe.com.br/v2
+    description: Produção
+  - url: https://homologacao.focusnfe.com.br/v2
+    description: Homologação (Sandbox)
+
+security:
+  - basicAuth: []
+
+paths:
+  /nfse:
+    post:
+      operationId: enviarNfse
+      summary: Enviar NFSe para processamento
+      description: |
+        Envia uma NFSe para processamento. É realizada uma pré-validação síncrona
+        dos dados; se aceita, a nota entra na fila de processamento assíncrono
+        junto à prefeitura do município.
+
+        Utilize o endpoint de consulta (`GET /nfse/{referencia}`) para verificar
+        o status de autorização após o envio.
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/enviarnfse
+      parameters:
+        - name: ref
+          in: query
+          required: true
+          description: Referência única para identificação da NFSe. Deve ser única por empresa.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NfseRequest'
+            example:
+              data_emissao: '2024-01-15T10:30:00-03:00'
+              natureza_operacao: '1'
+              optante_simples_nacional: true
+              prestador:
+                cnpj: '12345678000195'
+                inscricao_municipal: '12345'
+                codigo_municipio: '3550308'
+              tomador:
+                cnpj: '98765432000187'
+                razao_social: Empresa Tomadora Ltda
+                email: contato@tomador.com.br
+                telefone: '11999998888'
+                endereco:
+                  logradouro: Rua Exemplo
+                  numero: '100'
+                  bairro: Centro
+                  codigo_municipio: '3550308'
+                  uf: SP
+                  cep: '01001000'
+              servico:
+                valor_servicos: 1500.00
+                iss_retido: false
+                item_lista_servico: '1.07'
+                discriminacao: Serviços de desenvolvimento de software
+                codigo_municipio: '3550308'
+                aliquota: 0.05
+      responses:
+        '201':
+          description: NFSe aceita para processamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NfseProcessando'
+              example:
+                cnpj_prestador: '12345678000195'
+                ref: REF-001
+                numero_rps: '1'
+                serie_rps: '1'
+                tipo_rps: '1'
+                status: processando_autorizacao
+        '400':
+          description: Erro de validação na requisição
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '401':
+          description: Falha de autenticação
+        '422':
+          description: Erro de validação dos campos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /nfse/{referencia}:
+    get:
+      operationId: consultarNfse
+      summary: Consultar NFSe por referência
+      description: |
+        Consulta o status de processamento ou dados de autorização de uma NFSe.
+        O retorno varia conforme o status atual da nota:
+        - `processando_autorizacao`: Nota ainda em processamento
+        - `autorizado`: Nota autorizada pela prefeitura
+        - `cancelado`: Nota cancelada
+        - `erro_autorizacao`: Erro na autorização junto à prefeitura
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/consultarnfseporreferencia
+      parameters:
+        - $ref: '#/components/parameters/referencia'
+      responses:
+        '200':
+          description: Dados da NFSe conforme status atual
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/NfseProcessando'
+                  - $ref: '#/components/schemas/NfseAutorizada'
+                  - $ref: '#/components/schemas/NfseCancelada'
+                  - $ref: '#/components/schemas/NfseErroAutorizacao'
+                discriminator:
+                  propertyName: status
+                  mapping:
+                    processando_autorizacao: '#/components/schemas/NfseProcessando'
+                    autorizado: '#/components/schemas/NfseAutorizada'
+                    cancelado: '#/components/schemas/NfseCancelada'
+                    erro_autorizacao: '#/components/schemas/NfseErroAutorizacao'
+        '404':
+          description: NFSe não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                codigo: nao_encontrado
+                mensagem: Nota fiscal não encontrada
+
+    delete:
+      operationId: cancelarNfse
+      summary: Cancelar NFSe
+      description: |
+        Cancela uma NFSe autorizada. **Ação permanente e irreversível.**
+
+        Restrições:
+        - Apenas notas com status `autorizado` podem ser canceladas
+        - Alguns municípios não permitem cancelamento via webservice
+        - A justificativa deve ter entre 15 e 255 caracteres
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/cancelarnfse
+      parameters:
+        - $ref: '#/components/parameters/referencia'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                justificativa:
+                  type: string
+                  minLength: 15
+                  maxLength: 255
+                  description: Motivo do cancelamento (15-255 caracteres)
+            example:
+              justificativa: Cancelamento solicitado pelo tomador do serviço
+      responses:
+        '200':
+          description: Resultado do cancelamento
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/NfseCanceladaResponse'
+                  - $ref: '#/components/schemas/NfseErroCancelamento'
+        '400':
+          description: Nota não autorizada ou requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                codigo: nfe_nao_autorizada
+                mensagem: Nota fiscal não autorizada não pode ser cancelada
+        '404':
+          description: NFSe não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /nfse/{referencia}/email:
+    post:
+      operationId: reenviarEmailNfse
+      summary: Reenviar NFSe por e-mail
+      description: |
+        Envia a NFSe autorizada para endereços de e-mail alternativos.
+        Os e-mails são enviados em segundo plano, podendo levar alguns minutos.
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/reenviaremailnfse
+      parameters:
+        - $ref: '#/components/parameters/referencia'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emails]
+              properties:
+                emails:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: string
+                    format: email
+                  description: Lista de e-mails destinatários (máximo 10)
+            example:
+              emails:
+                - nome@example.org
+                - nome2@example.org
+      responses:
+        '200':
+          description: E-mails enfileirados para envio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emails:
+                    type: array
+                    items:
+                      type: string
+                      format: email
+              example:
+                emails:
+                  - nome@example.org
+                  - nome2@example.org
+        '404':
+          description: NFSe não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /nfse/{referencia}/hook:
+    post:
+      operationId: reenviarHookNfse
+      summary: Solicitar reenvio de notificação (webhook)
+      description: |
+        Solicita o reenvio das notificações via webhook para uma NFSe específica.
+        Retorna a lista de webhooks configurados que receberão a notificação.
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/reenviarhooknfse
+      parameters:
+        - $ref: '#/components/parameters/referencia'
+      responses:
+        '200':
+          description: Lista de webhooks notificados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebhookInfo'
+              example:
+                - id: Vj5rmkBq
+                  url: http://minha.url/nfse
+                  authorization: null
+                  authorization_header: null
+                  event: nfse
+                  cnpj: '12345678000123'
+        '401':
+          description: Falha de autenticação
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        Autenticação via HTTP Basic Auth.
+        Utilize o token da API como usuário e deixe a senha em branco.
+
+  parameters:
+    referencia:
+      name: referencia
+      in: path
+      required: true
+      description: Referência única da NFSe
+      schema:
+        type: string
+
+  schemas:
+    NfseRequest:
+      type: object
+      required:
+        - data_emissao
+        - natureza_operacao
+        - optante_simples_nacional
+        - prestador
+        - tomador
+        - servico
+      properties:
+        data_emissao:
+          type: string
+          format: date-time
+          description: Data/hora de emissão da NFSe (ISO 8601). Alguns municípios não utilizam hora.
+        natureza_operacao:
+          type: string
+          enum: ['1', '2', '3', '4', '5', '6']
+          description: |
+            Natureza da operação:
+            - `1` - Tributação no município
+            - `2` - Tributação fora do município
+            - `3` - Isenção
+            - `4` - Imune
+            - `5` - Exigibilidade suspensa por decisão judicial
+            - `6` - Exigibilidade suspensa por procedimento administrativo
+        optante_simples_nacional:
+          type: boolean
+          description: Se a empresa é optante pelo Simples Nacional
+        regime_especial_tributacao:
+          type: string
+          enum: ['1', '2', '3', '4', '5', '6']
+          description: |
+            Regime especial de tributação:
+            - `1` - Microempresa Municipal
+            - `2` - Estimativa
+            - `3` - Sociedade de Profissionais
+            - `4` - Cooperativa
+            - `5` - MEI - Simples Nacional
+            - `6` - ME/EPP - Simples Nacional
+        incentivador_cultural:
+          type: boolean
+          default: false
+          description: Se é incentivador cultural
+        prestador:
+          $ref: '#/components/schemas/Prestador'
+        tomador:
+          $ref: '#/components/schemas/Tomador'
+        servico:
+          $ref: '#/components/schemas/Servico'
+        intermediario:
+          $ref: '#/components/schemas/Intermediario'
+        codigo_obra:
+          type: string
+          maxLength: 15
+          description: Código da obra (construção civil)
+        art:
+          type: string
+          description: Código ART (construção civil)
+        numero_nfse_substituido:
+          type: string
+          description: Número da NFSe substituída
+        numero_rps_substituido:
+          type: string
+          description: Número do RPS substituído
+        serie_rps_substituido:
+          type: string
+          description: Série do RPS substituído
+        tipo_rps_substituido:
+          type: string
+          description: Tipo do RPS substituído
+
+    Prestador:
+      type: object
+      required:
+        - cnpj
+        - inscricao_municipal
+      properties:
+        cnpj:
+          type: string
+          pattern: '^\d{14}$'
+          description: CNPJ do prestador de serviço (somente números)
+        inscricao_municipal:
+          type: string
+          description: Inscrição municipal do prestador
+        codigo_municipio:
+          type: string
+          pattern: '^[0-9]{7}$'
+          description: Código IBGE do município do prestador (7 dígitos)
+
+    Tomador:
+      type: object
+      description: Dados do tomador do serviço. Informar `cpf` ou `cnpj`.
+      properties:
+        cpf:
+          type: string
+          pattern: '^[0-9]{11}$'
+          description: CPF do tomador (quando pessoa física, somente números)
+        cnpj:
+          type: string
+          pattern: '^[0-9]{14}$'
+          description: CNPJ do tomador (quando pessoa jurídica, somente números)
+        razao_social:
+          type: string
+          maxLength: 115
+          description: Razão social ou nome do tomador
+        nif:
+          type: string
+          description: Número de Identificação Fiscal do tomador estrangeiro (Reforma Tributária)
+        motivo_ausencia_nif:
+          type: string
+          enum: ['0', '1', '2']
+          description: |
+            Motivo da ausência do NIF:
+            - `0` - Não informado
+            - `1` - Dispensado
+            - `2` - Não exigido
+        inscricao_municipal:
+          type: string
+          description: Inscrição municipal do tomador
+        email:
+          type: string
+          format: email
+          maxLength: 80
+          description: E-mail do tomador
+        telefone:
+          type: string
+          pattern: '^[0-9]{10,11}$'
+          description: Telefone do tomador (10-11 dígitos, somente números)
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+
+    Endereco:
+      type: object
+      properties:
+        logradouro:
+          type: string
+          maxLength: 125
+          description: Logradouro (rua, avenida, etc.)
+        tipo_logradouro:
+          type: string
+          maxLength: 3
+          description: Tipo do logradouro (ex. Rua, Av). Padrão são os 3 primeiros caracteres do logradouro.
+        numero:
+          type: string
+          maxLength: 10
+          description: Número
+        complemento:
+          type: string
+          maxLength: 60
+          description: Complemento
+        bairro:
+          type: string
+          maxLength: 60
+          description: Bairro
+        codigo_municipio:
+          type: string
+          pattern: '^[0-9]{7}$'
+          description: Código IBGE do município (7 dígitos)
+        uf:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Sigla do estado (2 letras)
+        cep:
+          type: string
+          pattern: '^[0-9]{8}$'
+          description: CEP (8 dígitos, somente números)
+
+    Servico:
+      type: object
+      required:
+        - valor_servicos
+        - iss_retido
+        - item_lista_servico
+        - discriminacao
+        - codigo_municipio
+      properties:
+        valor_servicos:
+          type: number
+          format: double
+          description: Valor total dos serviços (R$)
+        iss_retido:
+          type: boolean
+          description: Se o ISS é retido pelo tomador
+        item_lista_servico:
+          type: string
+          description: Código do item da lista de serviço conforme LC 116/2003
+        discriminacao:
+          type: string
+          description: Descrição/discriminação detalhada dos serviços prestados
+        codigo_municipio:
+          type: string
+          pattern: '^[0-9]{7}$'
+          description: Código IBGE do município de prestação do serviço (7 dígitos)
+        aliquota:
+          type: number
+          format: double
+          description: Alíquota do ISS (ex. 0.05 para 5%)
+        valor_deducoes:
+          type: number
+          format: double
+          description: Valor das deduções (R$)
+        valor_pis:
+          type: number
+          format: double
+          description: Valor do PIS retido (R$)
+        valor_cofins:
+          type: number
+          format: double
+          description: Valor do COFINS retido (R$)
+        valor_inss:
+          type: number
+          format: double
+          description: Valor do INSS retido (R$)
+        valor_ir:
+          type: number
+          format: double
+          description: Valor do IR retido (R$)
+        valor_csll:
+          type: number
+          format: double
+          description: Valor do CSLL retido (R$)
+        valor_iss:
+          type: number
+          format: double
+          description: Valor do ISS (R$)
+        valor_iss_retido:
+          type: number
+          format: double
+          description: Valor do ISS retido (R$)
+        outras_retencoes:
+          type: number
+          format: double
+          description: Valor de outras retenções (R$)
+        base_calculo:
+          type: number
+          format: double
+          description: Base de cálculo do ISS (R$)
+        desconto_incondicionado:
+          type: number
+          format: double
+          description: Valor do desconto incondicionado (R$)
+        desconto_condicionado:
+          type: number
+          format: double
+          description: Valor do desconto condicionado (R$)
+        codigo_cnae:
+          type: string
+          description: Código CNAE da atividade
+        codigo_tributario_municipio:
+          type: string
+          description: Código tributário do município
+        codigo_nbs:
+          type: string
+          description: Código NBS – Nomenclatura Brasileira de Serviços (Reforma Tributária)
+        codigo_indicador_operacao:
+          type: string
+          description: Código indicador de operação (Reforma Tributária)
+        ibs_cbs_classificacao_tributaria:
+          type: string
+          description: Classificação tributária IBS/CBS (Reforma Tributária)
+        ibs_cbs_situacao_tributaria:
+          type: string
+          description: Código da situação tributária IBS/CBS (Reforma Tributária)
+        ibs_cbs_base_calculo:
+          type: number
+          format: double
+          description: Base de cálculo do IBS/CBS (R$) (Reforma Tributária)
+        ibs_uf_aliquota:
+          type: number
+          format: double
+          description: Alíquota do IBS estadual (Reforma Tributária)
+        ibs_mun_aliquota:
+          type: number
+          format: double
+          description: Alíquota do IBS municipal (Reforma Tributária)
+        cbs_aliquota:
+          type: number
+          format: double
+          description: Alíquota da CBS federal (Reforma Tributária)
+        ibs_uf_valor:
+          type: number
+          format: double
+          description: Valor calculado do IBS estadual (R$) (Reforma Tributária)
+        ibs_mun_valor:
+          type: number
+          format: double
+          description: Valor calculado do IBS municipal (R$) (Reforma Tributária)
+        cbs_valor:
+          type: number
+          format: double
+          description: Valor calculado da CBS federal (R$) (Reforma Tributária)
+        percentual_total_tributos:
+          type: number
+          format: double
+          description: Percentual aproximado de tributos (Lei da Transparência)
+        fonte_total_tributos:
+          type: string
+          description: Fonte do total de tributos
+
+    Intermediario:
+      type: object
+      description: Dados do intermediário do serviço (quando aplicável)
+      properties:
+        cpf:
+          type: string
+          pattern: '^[0-9]{11}$'
+          description: CPF do intermediário
+        cnpj:
+          type: string
+          pattern: '^[0-9]{14}$'
+          description: CNPJ do intermediário
+        nif:
+          type: string
+          description: Número de Identificação Fiscal do intermediário estrangeiro (Reforma Tributária)
+        motivo_ausencia_nif:
+          type: string
+          enum: ['0', '1', '2']
+          description: |
+            Motivo da ausência do NIF:
+            - `0` - Não informado
+            - `1` - Dispensado
+            - `2` - Não exigido
+        razao_social:
+          type: string
+          maxLength: 115
+          description: Razão social do intermediário
+        inscricao_municipal:
+          type: string
+          description: Inscrição municipal do intermediário
+
+    NfseProcessando:
+      type: object
+      description: NFSe em processamento junto à prefeitura
+      properties:
+        cnpj_prestador:
+          type: string
+        ref:
+          type: string
+        numero_rps:
+          type: string
+        serie_rps:
+          type: string
+        tipo_rps:
+          type: string
+        status:
+          type: string
+          enum: [processando_autorizacao]
+
+    NfseAutorizada:
+      type: object
+      description: NFSe autorizada pela prefeitura
+      properties:
+        cnpj_prestador:
+          type: string
+        ref:
+          type: string
+        numero_rps:
+          type: string
+        serie_rps:
+          type: string
+        tipo_rps:
+          type: string
+        status:
+          type: string
+          enum: [autorizado]
+        numero:
+          type: string
+          description: Número da NFSe emitida pela prefeitura
+        codigo_verificacao:
+          type: string
+          description: Código de verificação da NFSe
+        data_emissao:
+          type: string
+          format: date-time
+          description: Data/hora de emissão
+        url:
+          type: string
+          format: uri
+          description: URL para visualização da NFSe no site da prefeitura
+        caminho_xml_nota_fiscal:
+          type: string
+          description: Caminho relativo para download do XML da nota
+        url_danfse:
+          type: string
+          format: uri
+          description: URL do DANFSe (documento PDF)
+
+    NfseCancelada:
+      type: object
+      description: NFSe cancelada
+      properties:
+        cnpj_prestador:
+          type: string
+        ref:
+          type: string
+        numero_rps:
+          type: string
+        serie_rps:
+          type: string
+        tipo_rps:
+          type: string
+        status:
+          type: string
+          enum: [cancelado]
+        numero:
+          type: string
+        codigo_verificacao:
+          type: string
+        data_emissao:
+          type: string
+          format: date-time
+        url:
+          type: string
+          format: uri
+        caminho_xml_nota_fiscal:
+          type: string
+        caminho_xml_cancelamento:
+          type: string
+          description: Caminho relativo para download do XML de cancelamento
+        url_danfse:
+          type: string
+          format: uri
+
+    NfseErroAutorizacao:
+      type: object
+      description: NFSe com erro de autorização junto à prefeitura
+      properties:
+        cnpj_prestador:
+          type: string
+        ref:
+          type: string
+        numero_rps:
+          type: string
+        serie_rps:
+          type: string
+        tipo_rps:
+          type: string
+        status:
+          type: string
+          enum: [erro_autorizacao]
+        erros:
+          type: array
+          items:
+            $ref: '#/components/schemas/Erro'
+
+    NfseCanceladaResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [cancelado]
+
+    NfseErroCancelamento:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [erro_cancelamento]
+        erros:
+          type: array
+          items:
+            $ref: '#/components/schemas/Erro'
+
+    WebhookInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador do webhook
+        url:
+          type: string
+          format: uri
+          description: URL de notificação
+        authorization:
+          type: string
+          nullable: true
+        authorization_header:
+          type: string
+          nullable: true
+        event:
+          type: string
+          enum: [nfse]
+          description: Tipo do evento
+        cnpj:
+          type: string
+        cpf:
+          type: string
+
+    Erro:
+      type: object
+      properties:
+        codigo:
+          type: string
+          description: Código do erro
+        mensagem:
+          type: string
+          description: Mensagem descritiva do erro
+        correcao:
+          type: string
+          description: Sugestão de correção
