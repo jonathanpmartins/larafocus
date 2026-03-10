@@ -9,10 +9,7 @@ use Larafocus\Api;
 
 class TaxCodes extends Api
 {
-    public function __construct(protected string $cityCode)
-    {
-        parent::__construct();
-    }
+    public function __construct(protected string $cityCode) {}
 
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response

@@ -2,84 +2,80 @@
 
 use Illuminate\Support\Facades\Http;
 use Larafocus\Focus;
+use Larafocus\FocusManager;
 use Larafocus\Lib\Companies;
-
-covers(Focus::class);
 use Larafocus\Lib\Hooks;
 use Larafocus\Lib\Nfse;
 use Larafocus\Lib\Nfsen;
 use Larafocus\Lib\Search;
 
-beforeEach(function () {
-    Focus::$timeout = 60;
-    Focus::$environment = null;
-    Focus::$useMasterKey = false;
-    Focus::$token = null;
-});
+covers(FocusManager::class, Focus::class);
 
 test('default values are correct', function () {
-    expect(Focus::$timeout)->toBe(60)
-        ->and(Focus::$environment)->toBeNull()
-        ->and(Focus::$useMasterKey)->toBeFalse()
-        ->and(Focus::$token)->toBeNull();
+    $manager = app(FocusManager::class);
+
+    expect($manager->timeout)->toBe(60)
+        ->and($manager->environment)->toBeNull()
+        ->and($manager->useMasterKey)->toBeFalse()
+        ->and($manager->token)->toBeNull();
 });
 
-test('timeout sets timeout and returns Focus instance', function () {
+test('timeout sets timeout and returns instance', function () {
     $result = Focus::timeout(30);
 
-    expect($result)->toBeInstanceOf(Focus::class)
-        ->and(Focus::$timeout)->toBe(30);
+    expect($result)->toBeInstanceOf(FocusManager::class)
+        ->and($result->timeout)->toBe(30);
 });
 
 test('timeout uses default value', function () {
-    Focus::$timeout = 999;
+    Focus::timeout(999);
     Focus::timeout();
 
-    expect(Focus::$timeout)->toBe(60);
+    expect(app(FocusManager::class)->timeout)->toBe(60);
 });
 
-test('environment sets environment and returns Focus instance', function () {
+test('environment sets environment and returns instance', function () {
     $result = Focus::environment('production');
 
-    expect($result)->toBeInstanceOf(Focus::class)
-        ->and(Focus::$environment)->toBe('production');
+    expect($result)->toBeInstanceOf(FocusManager::class)
+        ->and($result->environment)->toBe('production');
 });
 
 test('environment defaults to null', function () {
-    Focus::$environment = 'production';
+    Focus::environment('production');
     Focus::environment();
 
-    expect(Focus::$environment)->toBeNull();
+    expect(app(FocusManager::class)->environment)->toBeNull();
 });
 
-test('useMasterKey sets flag and returns Focus instance', function () {
+test('useMasterKey sets flag and returns instance', function () {
     $result = Focus::useMasterKey();
 
-    expect($result)->toBeInstanceOf(Focus::class)
-        ->and(Focus::$useMasterKey)->toBeTrue();
+    expect($result)->toBeInstanceOf(FocusManager::class)
+        ->and($result->useMasterKey)->toBeTrue();
 });
 
 test('useMasterKey can be set to false', function () {
     Focus::useMasterKey(true);
     Focus::useMasterKey(false);
 
-    expect(Focus::$useMasterKey)->toBeFalse();
+    expect(app(FocusManager::class)->useMasterKey)->toBeFalse();
 });
 
-test('token sets token and returns Focus instance', function () {
+test('token sets token and returns instance', function () {
     $result = Focus::token('my-token');
 
-    expect($result)->toBeInstanceOf(Focus::class)
-        ->and(Focus::$token)->toBe('my-token');
+    expect($result)->toBeInstanceOf(FocusManager::class)
+        ->and($result->token)->toBe('my-token');
 });
 
-test('getEnv returns static environment when set', function () {
-    Focus::$environment = 'production';
+test('getEnv returns instance environment when set', function () {
+    Focus::environment('production');
 
     expect(Focus::getEnv())->toBe('production');
 });
 
-test('getEnv returns config environment when static is null', function () {
+test('getEnv returns config environment when instance is null', function () {
     expect(Focus::getEnv())->toBe('sandbox');
 });
 
@@ -121,6 +117,10 @@ test('factory methods pass configuration to instances', function () {
         return str_contains($request->url(), 'api.focusnfe.com.br')
             && str_contains($request->url(), '/nfse/ref-1');
     });
+});
+
+test('facade resolves to FocusManager', function () {
+    expect(Focus::getFacadeRoot())->toBeInstanceOf(FocusManager::class);
 });
 
 test('nfsen factory passes configuration', function () {

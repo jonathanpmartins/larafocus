@@ -6,6 +6,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
+use Larafocus\FocusManager;
 use Larafocus\LarafocusServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as BaseTestCase;
@@ -21,7 +22,8 @@ class UnitTestCase extends BaseTestCase
         $this->app['config']->set('larafocus.environment', 'sandbox');
         $this->app['config']->set('larafocus.sandbox.token', env('LARAFOCUS_SANDBOX_TOKEN', 'test-token'));
 
-        // $endpoint = config('larafocus.sandbox.endpoint').LarafocusServiceProvider::$prefix;
+        $this->app->forgetInstance(FocusManager::class);
+        \Larafocus\Focus::clearResolvedInstance(FocusManager::class);
 
         Http::fake();
     }

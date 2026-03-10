@@ -53,7 +53,10 @@
         "laravel": {
             "providers": [
                 "Larafocus\\LarafocusServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Focus": "Larafocus\\Focus"
+            }
         }
     },
     "autoload-dev": {

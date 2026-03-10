@@ -9,27 +9,17 @@ use Illuminate\Support\Facades\Http as HttpClient;
 
 class Http
 {
-    private bool $isXml;
+    private bool $isXml = false;
 
-    private bool $isPdf;
+    private bool $isPdf = false;
 
-    private int $timeout;
+    private int $timeout = 60;
 
-    private ?string $environment;
+    private ?string $environment = null;
 
-    private bool $useMasterKey;
+    private bool $useMasterKey = false;
 
-    private ?string $token;
-
-    public function __construct()
-    {
-        $this->isXml = false;
-        $this->isPdf = false;
-        $this->timeout = 60;
-        $this->environment = null;
-        $this->useMasterKey = false;
-        $this->token = null;
-    }
+    private ?string $token = null;
 
     public function timeout(int $timeout): static
     {
@@ -79,13 +69,11 @@ class Http
         if ($this->isXml) {
             $client = HttpClient::focusXml(
                 environment: $this->environment,
-                // useMasterKey: $this->useMasterKey,
                 token: $this->token,
             )->timeout($this->timeout);
         } elseif ($this->isPdf) {
             $client = HttpClient::focusPdf(
                 environment: $this->environment,
-                // useMasterKey: $this->useMasterKey,
                 token: $this->token,
             )->timeout($this->timeout);
         } else {

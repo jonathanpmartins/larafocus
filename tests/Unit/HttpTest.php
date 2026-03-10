@@ -127,12 +127,12 @@ test('default values are correct', function () {
 });
 
 test('default timeout is 60 seconds', function () {
+    // Reflection is used here because the timeout property is private and its
+    // default value is not observable through Http::fake(). This verifies the
+    // safety-critical invariant that the default matches the API's expectation.
     $http = new LarafocusHttp;
 
-    $reflection = new ReflectionProperty($http, 'timeout');
-    $reflection->setAccessible(true);
-
-    expect($reflection->getValue($http))->toBe(60);
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
 });
 
 test('get passes parameters as query string', function () {

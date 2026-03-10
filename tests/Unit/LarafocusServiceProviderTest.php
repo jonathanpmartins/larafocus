@@ -129,10 +129,10 @@ test('focusPdf macro uses provided token', function () {
 });
 
 test('service provider registers singleton', function () {
-    $focus1 = app(\Larafocus\Focus::class);
-    $focus2 = app(\Larafocus\Focus::class);
+    $focus1 = app(\Larafocus\FocusManager::class);
+    $focus2 = app(\Larafocus\FocusManager::class);
 
-    expect($focus1)->toBeInstanceOf(\Larafocus\Focus::class)
+    expect($focus1)->toBeInstanceOf(\Larafocus\FocusManager::class)
         ->and($focus1)->toBe($focus2);
 });
 

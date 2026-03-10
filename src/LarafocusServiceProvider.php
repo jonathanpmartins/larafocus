@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Larafocus;
 
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,11 +18,13 @@ class LarafocusServiceProvider extends ServiceProvider
             __DIR__.'/../config/larafocus.php' => config_path('larafocus.php'),
         ]);
 
+        $buildClient = self::buildClient(...);
+
         Http::macro('focus', function (
             ?string $environment = null,
             bool $useMasterKey = false,
             ?string $token = null,
-        ) {
+        ) use ($buildClient) {
             $environment = $environment ?: config()->string('larafocus.environment');
             if (! $token) {
                 if ($useMasterKey) {
@@ -31,36 +34,37 @@ class LarafocusServiceProvider extends ServiceProvider
                 }
             }
 
-            $token = base64_encode($token);
-            $endpoint = config()->string('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
-
-            return Http::withToken($token, 'Basic')
+            return $buildClient($environment, $token)
                 ->contentType('application/json')
-                ->acceptJson()
-                ->baseUrl($endpoint);
+                ->acceptJson();
         });
 
-        Http::macro('focusXml', function (?string $environment = null, ?string $token = null) {
+        Http::macro('focusXml', function (?string $environment = null, ?string $token = null) use ($buildClient) {
             $environment = $environment ?: config()->string('larafocus.environment');
-            $token = base64_encode($token ?: config()->string('larafocus.'.$environment.'.token'));
-            $endpoint = config()->string('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
+            $token = $token ?: config()->string('larafocus.'.$environment.'.token');
 
-            return Http::withToken($token, 'Basic')
+            return $buildClient($environment, $token)
                 ->contentType('application/xml')
-                ->accept('application/xml')
-                ->baseUrl($endpoint);
+                ->accept('application/xml');
         });
 
-        Http::macro('focusPdf', function (?string $environment = null, ?string $token = null) {
+        Http::macro('focusPdf', function (?string $environment = null, ?string $token = null) use ($buildClient) {
             $environment = $environment ?: config()->string('larafocus.environment');
-            $token = base64_encode($token ?: config()->string('larafocus.'.$environment.'.token'));
-            $endpoint = config()->string('larafocus.'.$environment.'.endpoint').LarafocusServiceProvider::$prefix;
+            $token = $token ?: config()->string('larafocus.'.$environment.'.token');
 
-            return Http::withToken($token, 'Basic')
+            return $buildClient($environment, $token)
                 ->contentType('application/pdf')
-                ->accept('application/pdf')
-                ->baseUrl($endpoint);
+                ->accept('application/pdf');
         });
+    }
+
+    private static function buildClient(string $environment, string $token): PendingRequest
+    {
+        $encodedToken = base64_encode($token);
+        $endpoint = config()->string('larafocus.'.$environment.'.endpoint').self::$prefix;
+
+        return Http::withToken($encodedToken, 'Basic')
+            ->baseUrl($endpoint);
     }
 
     public function register(): void
@@ -69,6 +73,6 @@ class LarafocusServiceProvider extends ServiceProvider
             __DIR__.'/../config/larafocus.php', 'larafocus'
         );
 
-        $this->app->singleton(Focus::class, fn (): Focus => new Focus);
+        $this->app->singleton(FocusManager::class, fn (): FocusManager => new FocusManager);
     }
 }
