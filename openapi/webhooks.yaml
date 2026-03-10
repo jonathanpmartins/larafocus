@@ -114,6 +114,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Webhook'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
         '404':
           description: Recurso não encontrado
           content:
