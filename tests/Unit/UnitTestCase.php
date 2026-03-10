@@ -19,7 +19,7 @@ class UnitTestCase extends BaseTestCase
         parent::setUp();
 
         $this->app['config']->set('larafocus.environment', 'sandbox');
-        $this->app['config']->set('larafocus.sandbox.token', env('LARAFOCUS_SANDBOX_TOKEN'));
+        $this->app['config']->set('larafocus.sandbox.token', env('LARAFOCUS_SANDBOX_TOKEN', 'test-token'));
 
         // $endpoint = config('larafocus.sandbox.endpoint').LarafocusServiceProvider::$prefix;
 

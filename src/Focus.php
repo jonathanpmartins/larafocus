@@ -43,14 +43,14 @@ class Focus
         return new self();
     }
 
-    public static function getEnv(): ?string
+    public static function getEnv(): string
     {
-        return self::$environment ?: config('larafocus.environment');
+        return self::$environment ?: config()->string('larafocus.environment', '');
     }
 
-    public static function getEndpoint(): ?string
+    public static function getEndpoint(): string
     {
-        return config('larafocus.'.self::getEnv().'.endpoint');
+        return config()->string('larafocus.'.self::getEnv().'.endpoint', '');
     }
 
     public static function nfse(): Nfse
