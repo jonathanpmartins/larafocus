@@ -51,6 +51,11 @@ class Api
             ->timeout($this->timeout);
     }
 
+    /**
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $validation
+     * @return Response|array<string, mixed>
+     */
     protected function validate(array $parameters, array $validation): Response|array
     {
         $validator = \Illuminate\Support\Facades\Validator::make($parameters, $validation);

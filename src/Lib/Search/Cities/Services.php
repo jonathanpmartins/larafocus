@@ -14,6 +14,7 @@ class Services extends Api
         $this->cityCode = $cityCode;
     }
 
+    /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
         return $this->http()->get('/municipios/'.$this->cityCode.'/itens_lista_servico', $parameters);

@@ -56,6 +56,7 @@ class Http
         return $this;
     }
 
+    /** @param array<string, mixed> $parameters */
     public function get(string $uri, array $parameters = []): Response
     {
         if ($this->isXml)
@@ -86,6 +87,7 @@ class Http
         return $client->get($uri, $parameters);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function post(string $uri, array $parameters = []): Response
     {
         return HttpClient::focus(
@@ -97,6 +99,7 @@ class Http
             ->post($uri, $parameters);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function patch(string $uri, array $parameters = []): Response
     {
         return HttpClient::focus(
@@ -108,6 +111,7 @@ class Http
             ->patch($uri, $parameters);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function delete(string $uri, array $parameters = []): Response
     {
         return HttpClient::focus(

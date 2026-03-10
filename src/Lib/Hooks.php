@@ -12,6 +12,7 @@ class Hooks extends Api
         return $this->http()->get('/hooks');
     }
 
+    /** @param array<string, mixed> $parameters */
     public function create(array $parameters = []): Response
     {
         return $this->http()->post('/hooks', $parameters);

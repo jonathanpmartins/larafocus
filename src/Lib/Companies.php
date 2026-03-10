@@ -15,6 +15,7 @@ class Companies extends Api
             ->get('/empresas', ['offset' => $offset]);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function create(array $parameters = []): Response
     {
         $environment = $this->environment ?: config('larafocus.environment');
@@ -34,6 +35,7 @@ class Companies extends Api
             ->get('/empresas/'.$id);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function update(string $id, array $parameters = []): Response
     {
         $environment = $this->environment ?: config('larafocus.environment');

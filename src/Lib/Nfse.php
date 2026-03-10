@@ -7,6 +7,7 @@ use Larafocus\Api;
 
 class Nfse extends Api
 {
+    /** @param array<string, mixed> $parameters */
     public function create(string $reference, array $parameters = []): Response
     {
         return $this->http()->post('/nfse?ref='.$reference, $parameters);
@@ -17,11 +18,13 @@ class Nfse extends Api
         return $this->http()->get('/nfse/'.$reference);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function cancel(string $reference, array $parameters = []): Response
     {
         return $this->http()->delete('/nfse/'.$reference, $parameters);
     }
 
+    /** @param array<string, mixed> $parameters */
     public function email(string $reference, array $parameters = []): Response
     {
         return $this->http()->post('/nfse/'.$reference.'/email', $parameters);

@@ -9,6 +9,7 @@ use Larafocus\Lib\Search\Cities\TaxCodes;
 
 class Cities extends Api
 {
+    /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
         return $this->http()->get('/municipios', $parameters);
