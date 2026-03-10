@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Larafocus\Lib\Search;
+namespace Larafocus\Search;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Api;
-use Larafocus\Lib\Search\Cities\Services;
-use Larafocus\Lib\Search\Cities\TaxCodes;
+use Larafocus\Infrastructure\Api;
+use Larafocus\Search\Cities\Services;
+use Larafocus\Search\Cities\TaxCodes;
 
 class Cities extends Api
 {

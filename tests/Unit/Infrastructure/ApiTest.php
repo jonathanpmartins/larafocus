@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Api;
+use Larafocus\Infrastructure\Api;
 
 covers(Api::class);
 

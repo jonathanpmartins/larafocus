@@ -2,23 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Larafocus;
+namespace Larafocus\Infrastructure;
 
-use Larafocus\Lib\Companies;
-use Larafocus\Lib\Hooks;
-use Larafocus\Lib\Nfse;
-use Larafocus\Lib\Nfsen;
-use Larafocus\Lib\Search;
+use Larafocus\Companies;
+use Larafocus\Hooks;
+use Larafocus\Nfse;
+use Larafocus\Nfsen;
+use Larafocus\Search;
 
 class FocusManager
 {
-    public int $timeout = 60;
-
-    public ?string $environment = null;
-
-    public bool $useMasterKey = false;
-
-    public ?string $token = null;
+    public function __construct(
+        public int $timeout = 60,
+        public ?string $environment = null,
+        public bool $useMasterKey = false,
+        public ?string $token = null,
+    ) {}
 
     public function timeout(int $timeoutInSeconds = 60): self
     {

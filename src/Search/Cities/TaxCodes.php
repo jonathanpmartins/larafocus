@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Larafocus\Lib\Search\Cities;
+namespace Larafocus\Search\Cities;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Api;
+use Larafocus\Infrastructure\Api;
 
 class TaxCodes extends Api
 {
-    public function __construct(protected string $cityCode) {}
+    public function __construct(protected string $cityCode)
+    {
+        parent::__construct();
+    }
 
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response

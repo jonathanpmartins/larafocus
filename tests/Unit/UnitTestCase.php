@@ -6,8 +6,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
-use Larafocus\FocusManager;
-use Larafocus\LarafocusServiceProvider;
+use Larafocus\Infrastructure\FocusManager;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
@@ -30,12 +29,12 @@ class UnitTestCase extends BaseTestCase
 
     protected function getPackageProviders($app): array
     {
-        return [LarafocusServiceProvider::class];
+        return [\Larafocus\LarafocusServiceProvider::class];
     }
 
     public function makePath(string $path): string
     {
-        return LarafocusServiceProvider::$prefix.$path;
+        return config()->string('larafocus.prefix').$path;
     }
 
     public function assertRequest(string $method, string $path, Response $response): void

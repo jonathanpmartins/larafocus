@@ -9,6 +9,7 @@ return [
     | Currently supported values: "sandbox", "production"
     |
     */
+    'prefix' => env('LARAFOCUS_PREFIX', '/v2'),
     'environment' => env('LARAFOCUS_ENVIRONMENT', 'production'),
     'master_token' => env('LARAFOCUS_MASTER_TOKEN', ''),
     'sandbox' => [

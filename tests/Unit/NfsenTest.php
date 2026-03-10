@@ -1,7 +1,7 @@
 <?php
 
 use Larafocus\Focus;
-use Larafocus\Lib\Nfsen;
+use Larafocus\Nfsen;
 
 covers(Nfsen::class);
 

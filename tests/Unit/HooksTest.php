@@ -1,7 +1,7 @@
 <?php
 
 use Larafocus\Focus;
-use Larafocus\Lib\Hooks;
+use Larafocus\Hooks;
 
 covers(Hooks::class);
 

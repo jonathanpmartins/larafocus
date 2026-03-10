@@ -1,7 +1,7 @@
 <?php
 
 use Larafocus\Focus;
-use Larafocus\Lib\Search\Cities\TaxCodes;
+use Larafocus\Search\Cities\TaxCodes;
 
 covers(TaxCodes::class);
 

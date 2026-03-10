@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Larafocus;
 
 use Illuminate\Support\Facades\Facade;
+use Larafocus\Infrastructure\FocusManager;
 
 /**
  * @mixin FocusManager

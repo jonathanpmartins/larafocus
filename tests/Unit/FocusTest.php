@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Http;
+use Larafocus\Companies;
 use Larafocus\Focus;
-use Larafocus\FocusManager;
-use Larafocus\Lib\Companies;
-use Larafocus\Lib\Hooks;
-use Larafocus\Lib\Nfse;
-use Larafocus\Lib\Nfsen;
-use Larafocus\Lib\Search;
+use Larafocus\Hooks;
+use Larafocus\Infrastructure\FocusManager;
+use Larafocus\Nfse;
+use Larafocus\Nfsen;
+use Larafocus\Search;
 
 covers(FocusManager::class, Focus::class);
 

@@ -1,7 +1,7 @@
 <?php
 
+use Larafocus\Companies;
 use Larafocus\Focus;
-use Larafocus\Lib\Companies;
 
 covers(Companies::class);
 

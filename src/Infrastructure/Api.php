@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Larafocus;
+namespace Larafocus\Infrastructure;
 
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Http\Client\Response;
@@ -12,13 +12,12 @@ use Illuminate\Validation\Validator;
 
 class Api
 {
-    protected int $timeout = 60;
-
-    protected ?string $environment = null;
-
-    protected bool $useMasterKey = false;
-
-    protected ?string $token = null;
+    public function __construct(
+        protected int $timeout = 60,
+        protected ?string $environment = null,
+        protected bool $useMasterKey = false,
+        protected ?string $token = null,
+    ) {}
 
     public function timeout(int $timeoutInSeconds = 60): static
     {

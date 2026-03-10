@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Larafocus\Lib;
+namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Api;
+use Larafocus\Infrastructure\Api;
 
 class Companies extends Api
 {

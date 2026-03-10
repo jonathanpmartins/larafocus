@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Larafocus\Lib;
+namespace Larafocus;
 
-use Larafocus\Api;
-use Larafocus\Lib\Search\Cities;
+use Larafocus\Infrastructure\Api;
+use Larafocus\Search\Cities;
 
 class Search extends Api
 {

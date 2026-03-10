@@ -1,7 +1,7 @@
 <?php
 
 use Larafocus\Focus;
-use Larafocus\Lib\Search\Cities\Services;
+use Larafocus\Search\Cities\Services;
 
 covers(Services::class);
 
