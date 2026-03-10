@@ -15,32 +15,32 @@ class Focus
     public static bool $useMasterKey = false;
     public static ?string $token = null;
 
-    public static function timeout(int $timeoutInSeconds = 60): static
+    public static function timeout(int $timeoutInSeconds = 60): self
     {
         self::$timeout = $timeoutInSeconds;
 
-        return new static;
+        return new self();
     }
 
-    public static function environment(?string $environment = null): static
+    public static function environment(?string $environment = null): self
     {
         self::$environment = $environment;
 
-        return new static;
+        return new self();
     }
 
-    public static function useMasterKey(bool $isTrue = true): static
+    public static function useMasterKey(bool $isTrue = true): self
     {
         self::$useMasterKey = $isTrue;
 
-        return new static;
+        return new self();
     }
 
-    public static function token(string $token): static
+    public static function token(string $token): self
     {
         self::$token = $token;
 
-        return new static;
+        return new self();
     }
 
     public static function getEnv(): ?string
