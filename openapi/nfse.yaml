@@ -791,8 +791,11 @@ components:
           description: Tipo do evento
         cnpj:
           type: string
+          description: CNPJ vinculado ao gatilho
         cpf:
           type: string
+          nullable: true
+          description: CPF vinculado ao gatilho
 
     Erro:
       type: object
