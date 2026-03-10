@@ -1,0 +1,288 @@
+openapi: 3.0.3
+
+info:
+  title: FocusNFe API - Webhooks
+  description: |
+    Endpoints para gerenciamento de webhooks (gatilhos de notificação).
+    Webhooks permitem receber notificações automáticas quando documentos
+    fiscais mudam de status.
+  version: 2.0.0
+  contact:
+    name: FocusNFe
+    url: https://focusnfe.com.br
+
+servers:
+  - url: https://api.focusnfe.com.br/v2
+    description: Produção
+  - url: https://homologacao.focusnfe.com.br/v2
+    description: Homologação (Sandbox)
+
+security:
+  - basicAuth: []
+
+paths:
+  /hooks:
+    get:
+      operationId: listarWebhooks
+      summary: Listar webhooks
+      description: Retorna todos os webhooks configurados para a empresa autenticada.
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/listarwebhooks
+      responses:
+        '200':
+          description: Lista de gatilhos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Webhook'
+              example:
+                - id: Vj5rmkBq
+                  url: http://minha.url/nfe
+                  authorization: null
+                  authorization_header: null
+                  event: nfe
+                  cnpj: '12345678000123'
+                  cpf: null
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+    post:
+      operationId: criarWebhook
+      summary: Criar webhook
+      description: |
+        Cria um novo gatilho de notificação. Quando o evento monitorado ocorrer,
+        uma requisição POST será enviada para a URL configurada com os dados
+        do documento fiscal.
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/criarwebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+            example:
+              cnpj: '12345678000123'
+              event: nfse
+              url: https://minha.api.com/webhook/nfse
+              authorization: Bearer meu-token-secreto
+      responses:
+        '200':
+          description: Gatilho criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                codigo: nao_encontrado
+                mensagem: Gatilho não encontrado
+
+  /hooks/{id}:
+    get:
+      operationId: consultarWebhook
+      summary: Consultar webhook por ID
+      description: Retorna os dados de um webhook específico.
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/consultarwebhook
+      parameters:
+        - $ref: '#/components/parameters/hookId'
+      responses:
+        '200':
+          description: Gatilho encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '404':
+          description: Recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                codigo: nao_encontrado
+                mensagem: Gatilho não encontrado
+
+    delete:
+      operationId: excluirWebhook
+      summary: Excluir webhook
+      description: "Remove permanentemente um webhook. Retorna os dados do webhook excluído com `deleted: true`."
+      externalDocs:
+        description: Documentação oficial
+        url: https://doc.focusnfe.com.br/reference/excluirwebhook
+      parameters:
+        - $ref: '#/components/parameters/hookId'
+      responses:
+        '200':
+          description: Gatilho excluído com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookDeleted'
+              example:
+                id: Vj5rmkBq
+                url: http://minha.url/nfe
+                authorization: null
+                authorization_header: null
+                event: nfe
+                cnpj: '12345678000123'
+                cpf: null
+                deleted: true
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Recurso não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                codigo: nao_encontrado
+                mensagem: Gatilho não encontrado
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        Autenticação via HTTP Basic Auth.
+        Token da API como usuário, senha em branco.
+
+  parameters:
+    hookId:
+      name: id
+      in: path
+      required: true
+      description: Identificador do gatilho
+      schema:
+        type: string
+      example: Vj5rmkBq
+
+  schemas:
+    WebhookRequest:
+      type: object
+      required:
+        - event
+        - url
+      properties:
+        cnpj:
+          type: string
+          description: CNPJ da empresa
+        cpf:
+          type: string
+          description: CPF do prestador de serviço
+        event:
+          type: string
+          enum:
+            - nfe
+            - nfse
+            - nfsen
+            - nfce_contingencia
+            - nfe_recebida
+            - nfe_recebida_falha_consulta
+            - nfse_recebida
+            - cte_recebida
+            - inutilizacao
+            - cte
+            - mdfe
+            - nfcom
+          description: Evento a ser monitorado
+        url:
+          type: string
+          format: uri
+          description: URL que receberá as notificações
+        authorization:
+          type: string
+          nullable: true
+          description: Valor a ser enviado no cabeçalho de autorização
+        authorization_header:
+          type: string
+          nullable: true
+          description: Nome do cabeçalho HTTP a ser utilizado para enviar o campo authorization
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador único
+        url:
+          type: string
+          format: uri
+          description: URL que receberá as notificações
+        authorization:
+          type: string
+          nullable: true
+          description: Valor a ser enviado no cabeçalho de autorização
+        authorization_header:
+          type: string
+          nullable: true
+          description: Nome do cabeçalho HTTP a ser utilizado para enviar o campo authorization
+        event:
+          type: string
+          enum:
+            - nfe
+            - nfse
+            - nfsen
+            - nfce_contingencia
+            - nfe_recebida
+            - nfe_recebida_falha_consulta
+            - nfse_recebida
+            - cte_recebida
+            - inutilizacao
+            - cte
+            - mdfe
+            - nfcom
+          description: Evento monitorado
+        cnpj:
+          type: string
+          description: CNPJ vinculado ao gatilho
+        cpf:
+          type: string
+          description: CPF vinculado ao gatilho
+
+    WebhookDeleted:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            deleted:
+              type: boolean
+              enum: [true]
+              description: Confirmação de exclusão
+
+    Erro:
+      type: object
+      properties:
+        codigo:
+          type: string
+          description: Código do erro
+        mensagem:
+          type: string
+          description: Mensagem descritiva do erro
