@@ -1,0 +1,405 @@
+openapi: 3.0.3
+
+info:
+  title: FocusNFe API - Municípios (beta)
+  description: |
+    API para consulta de municípios cadastrados na base do IBGE, itens da lista de serviço
+    e códigos tributários municipais. Permite localizar municípios pelo nome, recuperar o
+    código do município, verificar se o município tem NFSe implementada e demais
+    especificidades de cada município.
+  version: 2.0.0
+  contact:
+    name: FocusNFe
+    url: https://focusnfe.com.br
+
+servers:
+  - url: https://api.focusnfe.com.br/v2
+    description: Produção
+  - url: https://homologacao.focusnfe.com.br/v2
+    description: Homologação (Sandbox)
+
+security:
+  - basicAuth: []
+
+paths:
+  /municipios:
+    get:
+      operationId: listarMunicipios
+      summary: Listar municípios
+      description: |
+        Busca todos os municípios ou filtra-os de acordo com parâmetros.
+        A API devolve no máximo 100 registros por vez. Use o parâmetro `offset`
+        para paginação. O header `X-Total-Count` indica o total de ocorrências.
+      parameters:
+        - name: sigla_uf
+          in: query
+          description: Filtrar por sigla do estado (2 letras)
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+          example: PR
+        - name: nome_municipio
+          in: query
+          description: Busca pelo nome exato do município
+          schema:
+            type: string
+          example: Curitiba
+        - name: nome
+          in: query
+          description: Busca por parte do nome do município (busca parcial)
+          schema:
+            type: string
+          example: Curitiba
+        - name: status_nfse
+          in: query
+          description: Filtrar pelo status da emissão de NFSe no município
+          schema:
+            type: string
+            enum:
+              - ativo
+              - fora_do_ar
+              - pausado
+              - em_implementacao
+              - em_reimplementacao
+              - inativo
+              - nao_implementado
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Lista de municípios
+          headers:
+            X-Total-Count:
+              description: Número total de ocorrências da pesquisa
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Municipio'
+              example:
+                - codigo_municipio: '4204806'
+                  nome_municipio: Curitibanos
+                  sigla_uf: SC
+                  nome_uf: Santa Catarina
+                  nfse_habilitada: false
+                  status_nfse: nao_implementado
+                - codigo_municipio: '4106902'
+                  nome_municipio: Curitiba
+                  sigla_uf: PR
+                  nome_uf: Paraná
+                  nfse_habilitada: true
+                  requer_certificado_nfse: true
+                  possui_ambiente_homologacao_nfse: true
+                  possui_cancelamento_nfse: true
+                  provedor_nfse: Tecnos
+                  endereco_obrigatorio_nfse: null
+                  cpf_cnpj_obrigatorio_nfse: null
+                  codigo_cnae_obrigatorio_nfse: true
+                  item_lista_servico_obrigatorio_nfse: false
+                  codigo_tributario_municipio_obrigatorio_nfse: false
+                  status_nfse: ativo
+                  data_previsao_reimplementacao_nfse: null
+                  ultima_emissao_nfse: '2025-10-01T00:00:00Z'
+
+  /municipios/{codigoMunicipio}:
+    get:
+      operationId: consultarMunicipio
+      summary: Consultar município por código IBGE
+      description: Busca um município único pelo seu código IBGE.
+      parameters:
+        - $ref: '#/components/parameters/codigoMunicipio'
+      responses:
+        '200':
+          description: Dados do município
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Municipio'
+        '404':
+          description: Município não encontrado
+
+  /municipios/{codigoMunicipio}/itens_lista_servico:
+    get:
+      operationId: listarServicos
+      summary: Listar itens da lista de serviço
+      description: |
+        Busca todos os itens da lista de serviço de acordo com o município
+        ou filtra-os de acordo com parâmetros. Estes códigos são usados no campo
+        `servico.item_lista_servico` ao emitir uma NFSe.
+      parameters:
+        - $ref: '#/components/parameters/codigoMunicipio'
+        - name: codigo
+          in: query
+          description: Busca pelo código ou trecho do código (ex. "14.01" ou "14.")
+          schema:
+            type: string
+          example: '14.01'
+        - name: descricao
+          in: query
+          description: Busca pelo trecho da descrição
+          schema:
+            type: string
+          example: informática
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Lista de itens de serviço
+          headers:
+            X-Total-Count:
+              description: Número total de ocorrências da pesquisa
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemListaServico'
+              example:
+                - codigo: '1.06'
+                  descricao: Assessoria e consultoria em informática.
+                  tax_rate: null
+                - codigo: '1.07'
+                  descricao: Suporte técnico em informática, inclusive instalação, configuração e manutenção de programas de computação e bancos de dados.
+                  tax_rate: null
+
+  /municipios/{codigoMunicipio}/itens_lista_servico/{codigoServico}:
+    get:
+      operationId: consultarServico
+      summary: Consultar item da lista de serviço
+      description: Busca um item da lista de serviço único pelo seu código de acordo com o município.
+      parameters:
+        - $ref: '#/components/parameters/codigoMunicipio'
+        - name: codigoServico
+          in: path
+          required: true
+          description: Código do item da lista de serviço (ex. "1.07")
+          schema:
+            type: string
+          example: '1.07'
+      responses:
+        '200':
+          description: Dados do item de serviço
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemListaServico'
+        '404':
+          description: Item de serviço não encontrado
+
+  /municipios/{codigoMunicipio}/codigos_tributarios_municipio:
+    get:
+      operationId: listarCodigosTributarios
+      summary: Listar códigos tributários do município
+      description: |
+        Busca todos os códigos tributários municipais de acordo com o município
+        ou filtra-os de acordo com parâmetros. Estes códigos são usados no campo
+        `servico.codigo_tributario_municipio` ao emitir uma NFSe, quando o município exige.
+      parameters:
+        - $ref: '#/components/parameters/codigoMunicipio'
+        - name: codigo
+          in: query
+          description: Busca pelo código ou trecho do código
+          schema:
+            type: string
+        - name: descricao
+          in: query
+          description: Busca pelo trecho da descrição
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Lista de códigos tributários
+          headers:
+            X-Total-Count:
+              description: Número total de ocorrências da pesquisa
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodigoTributarioMunicipio'
+
+  /municipios/{codigoMunicipio}/codigos_tributarios_municipio/{codigoTributario}:
+    get:
+      operationId: consultarCodigoTributario
+      summary: Consultar código tributário do município
+      description: Busca um código tributário municipal único pelo seu código de acordo com o município.
+      parameters:
+        - $ref: '#/components/parameters/codigoMunicipio'
+        - name: codigoTributario
+          in: path
+          required: true
+          description: Código tributário municipal
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dados do código tributário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodigoTributarioMunicipio'
+        '404':
+          description: Código tributário não encontrado
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        Autenticação via HTTP Basic Auth.
+        Token da API como usuário, senha em branco.
+
+  parameters:
+    codigoMunicipio:
+      name: codigoMunicipio
+      in: path
+      required: true
+      description: Código IBGE do município (7 dígitos)
+      schema:
+        type: string
+        pattern: '^[0-9]{7}$'
+      example: '4106902'
+
+    offset:
+      name: offset
+      in: query
+      description: |
+        Deslocamento para paginação. A API devolve no máximo 100 registros por vez.
+        Use este parâmetro para buscar os demais registros.
+      schema:
+        type: integer
+        minimum: 0
+      example: 100
+
+  schemas:
+    Municipio:
+      type: object
+      description: |
+        Dados de um município. Campos relacionados a NFSe só estão presentes
+        quando `nfse_habilitada` é `true`. Novos campos poderão ser adicionados.
+      properties:
+        codigo_municipio:
+          type: string
+          description: Código IBGE do município (7 dígitos)
+        nome_municipio:
+          type: string
+          description: Nome completo do município segundo o IBGE
+        sigla_uf:
+          type: string
+          description: Sigla do estado (2 letras)
+        nome_uf:
+          type: string
+          description: Nome completo do estado
+        nfse_habilitada:
+          type: boolean
+          description: Indica se a NFSe está implementada para este município
+        requer_certificado_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se o município precisa de certificado digital para emissão de NFSe.
+            Caso contrário, alguma combinação de token e/ou usuário e senha deverá ser usada.
+        possui_ambiente_homologacao_nfse:
+          type: boolean
+          nullable: true
+          description: Indica se existe ambiente de homologação neste município
+        possui_cancelamento_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se é possível cancelamento de NFSe via API neste município.
+            Caso contrário, pode ser possível pela interface da prefeitura.
+        provedor_nfse:
+          type: string
+          nullable: true
+          description: Nome do provedor de NFSe utilizado pelo município
+        endereco_obrigatorio_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se o endereço é obrigatório para emissão de NFSe.
+            `true` = obrigatório, `false` = não obrigatório, `null` = informação ausente.
+        cpf_cnpj_obrigatorio_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se o CPF/CNPJ é obrigatório para emissão de NFSe.
+            `true` = obrigatório, `false` = não obrigatório, `null` = informação ausente.
+        codigo_cnae_obrigatorio_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se o código CNAE é obrigatório para emissão de NFSe.
+            `true` = obrigatório, `false` = não obrigatório, `null` = informação ausente.
+        item_lista_servico_obrigatorio_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se o item da lista de serviço é obrigatório para emissão de NFSe.
+            Se `true`, use o endpoint de itens_lista_servico para consultar os valores possíveis.
+            `true` = obrigatório, `false` = não obrigatório, `null` = informação ausente.
+        codigo_tributario_municipio_obrigatorio_nfse:
+          type: boolean
+          nullable: true
+          description: |
+            Indica se o código tributário do município é obrigatório para emissão de NFSe.
+            Se `true`, use o endpoint de codigos_tributarios_municipio para consultar os valores possíveis.
+            `true` = obrigatório, `false` = não obrigatório, `null` = informação ausente.
+        status_nfse:
+          type: string
+          description: Status operacional da emissão de NFSe no município
+          enum:
+            - ativo
+            - fora_do_ar
+            - pausado
+            - em_implementacao
+            - em_reimplementacao
+            - inativo
+            - nao_implementado
+        data_previsao_reimplementacao_nfse:
+          type: string
+          format: date
+          nullable: true
+          description: |
+            Data prevista para reimplementação da NFSe no município (formato ISO 8601).
+            `null` indica que não há previsão.
+        ultima_emissao_nfse:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            Data e hora da última emissão de NFSe via API no município (formato ISO 8601).
+            Pode ser `null` quando não houver emissões registradas.
+
+    ItemListaServico:
+      type: object
+      properties:
+        codigo:
+          type: string
+          description: Código do item da lista de serviço (conforme LC 116/2003)
+        descricao:
+          type: string
+          description: Descrição do serviço
+        tax_rate:
+          type: number
+          nullable: true
+          description: Alíquota do serviço (pode ser `null`)
+
+    CodigoTributarioMunicipio:
+      type: object
+      properties:
+        codigo:
+          type: string
+          description: Código tributário municipal
+        descricao:
+          type: string
+          description: Descrição do código tributário
