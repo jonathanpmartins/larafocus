@@ -74,7 +74,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Erro'
+                $ref: '#/components/schemas/ErroRequisicao'
         '401':
           description: Não autorizado
         '422':
@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Erro'
+                $ref: '#/components/schemas/ErroRequisicao'
 
   /nfsen/{referencia}:
     get:
@@ -122,7 +122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Erro'
+                $ref: '#/components/schemas/ErroRequisicao'
         '401':
           description: Não autorizado
 
@@ -167,7 +167,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Erro'
+                $ref: '#/components/schemas/ErroRequisicao'
         '401':
           description: Não autorizado
 
@@ -344,10 +344,9 @@ components:
           description: Número da NFSe Nacional
         codigo_verificacao:
           type: string
-          description: Código de verificação para consulta da NFSe Nacional, pode ser usado no portal do Ambiente Nacional para consulta
+          description: Código de verificação para consulta da NFSe Nacional
         data_emissao:
           type: string
-          format: date-time
           description: Data da emissão da nota fiscal
         url:
           type: string
@@ -389,10 +388,9 @@ components:
           description: Número da NFSe Nacional
         codigo_verificacao:
           type: string
-          description: Código de verificação para consulta da NFSe Nacional, pode ser usado no portal do Ambiente Nacional para consulta
+          description: Código de verificação para consulta da NFSe Nacional
         data_emissao:
           type: string
-          format: date-time
           description: Data da emissão da nota fiscal
         url:
           type: string
@@ -434,10 +432,9 @@ components:
           description: Número da NFSe Nacional
         codigo_verificacao:
           type: string
-          description: Código de verificação para consulta da NFSe Nacional, pode ser usado no portal do Ambiente Nacional para consulta
+          description: Código de verificação para consulta da NFSe Nacional
         data_emissao:
           type: string
-          format: date-time
           description: Data da emissão da nota fiscal
         url:
           type: string
@@ -485,6 +482,7 @@ components:
         status:
           type: string
           enum: [cancelado]
+          description: Status da NFSe
 
     NfsenErroCancelamento:
       type: object
@@ -492,8 +490,10 @@ components:
         status:
           type: string
           enum: [erro_cancelamento]
+          description: Status da NFSe
         erros:
           type: array
+          description: Lista de erros
           items:
             $ref: '#/components/schemas/Erro'
 
@@ -513,6 +513,7 @@ components:
           nullable: true
         event:
           type: string
+          enum: [nfsen]
           description: Evento monitorado
         cnpj:
           type: string
@@ -521,6 +522,16 @@ components:
           type: string
           nullable: true
           description: CPF vinculado ao gatilho
+
+    ErroRequisicao:
+      type: object
+      properties:
+        codigo:
+          type: string
+          description: Código do erro
+        mensagem:
+          type: string
+          description: Mensagem descritiva do erro
 
     Erro:
       type: object
@@ -533,5 +544,4 @@ components:
           description: Mensagem do erro
         correcao:
           type: string
-          nullable: true
           description: Correção do erro
