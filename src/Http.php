@@ -9,17 +9,27 @@ use Illuminate\Support\Facades\Http as HttpClient;
 
 class Http
 {
-    private bool $isXml = false;
+    private bool $isXml;
 
-    private bool $isPdf = false;
+    private bool $isPdf;
 
-    private int $timeout = 60;
+    private int $timeout;
 
-    private ?string $environment = null;
+    private ?string $environment;
 
-    private bool $useMasterKey = false;
+    private bool $useMasterKey;
 
-    private ?string $token = null;
+    private ?string $token;
+
+    public function __construct()
+    {
+        $this->isXml = false;
+        $this->isPdf = false;
+        $this->timeout = 60;
+        $this->environment = null;
+        $this->useMasterKey = false;
+        $this->token = null;
+    }
 
     public function timeout(int $timeout): static
     {

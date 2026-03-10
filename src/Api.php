@@ -11,13 +11,21 @@ use Illuminate\Validation\Validator;
 
 class Api
 {
-    protected int $timeout = 60;
+    protected int $timeout;
 
-    protected ?string $environment = null;
+    protected ?string $environment;
 
-    protected bool $useMasterKey = false;
+    protected bool $useMasterKey;
 
-    protected ?string $token = null;
+    protected ?string $token;
+
+    public function __construct()
+    {
+        $this->timeout = 60;
+        $this->environment = null;
+        $this->useMasterKey = false;
+        $this->token = null;
+    }
 
     public function timeout(int $timeoutInSeconds = 60): static
     {

@@ -1,6 +1,9 @@
 <?php
 
 use Larafocus\Focus;
+use Larafocus\Lib\Hooks;
+
+covers(Hooks::class);
 
 test('list method', function () {
     $response = Focus::hooks()->list();

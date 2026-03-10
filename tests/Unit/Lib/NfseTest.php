@@ -1,6 +1,9 @@
 <?php
 
 use Larafocus\Focus;
+use Larafocus\Lib\Nfse;
+
+covers(Nfse::class);
 
 test('create method', function () {
     $response = Focus::nfse()->create('01');

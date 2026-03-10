@@ -4,6 +4,8 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Larafocus\Http as LarafocusHttp;
 
+covers(LarafocusHttp::class);
+
 test('get with xml format uses focusXml macro', function () {
     $http = (new LarafocusHttp)
         ->environment('sandbox')
@@ -106,6 +108,33 @@ test('setter methods return same instance for chaining', function () {
     expect($http->isPdf())->toBe($http);
 });
 
+test('default values are correct', function () {
+    $this->app['config']->set('larafocus.sandbox.token', 'env-token');
+    $this->app['config']->set('larafocus.master_token', 'master-token');
+
+    // Without calling useMasterKey(), should use environment token (useMasterKey defaults to false)
+    $http = (new LarafocusHttp)
+        ->environment('sandbox');
+
+    $response = $http->get('/test');
+
+    Http::assertSent(function (Request $request) {
+        $expectedToken = base64_encode('env-token');
+
+        return $request->hasHeader('Content-Type', 'application/json')
+            && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('default timeout is 60 seconds', function () {
+    $http = new LarafocusHttp;
+
+    $reflection = new ReflectionProperty($http, 'timeout');
+    $reflection->setAccessible(true);
+
+    expect($reflection->getValue($http))->toBe(60);
+});
+
 test('get passes parameters as query string', function () {
     $http = (new LarafocusHttp)
         ->environment('sandbox')
@@ -132,5 +161,21 @@ test('useMasterKey is passed to focus macro', function () {
     Http::assertSent(function (Request $request) {
         return $request->method() === 'POST'
             && str_contains($request->url(), '/empresas');
+    });
+});
+
+test('useMasterKey defaults to true when called without arguments', function () {
+    $this->app['config']->set('larafocus.master_token', 'master-key');
+    $http = (new LarafocusHttp)
+        ->environment('sandbox')
+        ->useMasterKey()
+        ->timeout(60);
+
+    $response = $http->post('/test', []);
+
+    Http::assertSent(function (Request $request) {
+        $expectedToken = base64_encode('master-key');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });
 });

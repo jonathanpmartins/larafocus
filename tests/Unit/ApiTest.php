@@ -3,6 +3,8 @@
 use Illuminate\Http\Client\Response;
 use Larafocus\Api;
 
+covers(Api::class);
+
 test('validate returns validated data on success', function () {
     $api = new class extends Api
     {
@@ -107,7 +109,15 @@ test('timeout defaults to 60', function () {
         {
             return $this->timeout;
         }
+
+        public function getMasterKey(): bool
+        {
+            return $this->useMasterKey;
+        }
     };
+
+    expect($api->getTimeout())->toBe(60)
+        ->and($api->getMasterKey())->toBeFalse();
 
     $api->timeout();
 

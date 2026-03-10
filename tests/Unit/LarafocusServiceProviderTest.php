@@ -4,6 +4,8 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Larafocus\LarafocusServiceProvider;
 
+covers(LarafocusServiceProvider::class);
+
 test('focusXml macro sets xml content type', function () {
     Http::fake();
 

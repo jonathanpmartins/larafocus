@@ -1,10 +1,18 @@
 <?php
 
 use Larafocus\Focus;
+use Larafocus\Lib\Companies;
+
+covers(Companies::class);
 
 test('list method', function () {
     $response = Focus::companies()->list();
     $this->assertRequest('GET', '/empresas', $response);
+
+    Http::assertSent(function ($request) {
+        return $request->method() === 'GET'
+            && str_contains($request->url(), 'offset=0');
+    });
 
     $response = Focus::companies()->list(10);
     $this->assertRequest('GET', '/empresas?offset=10', $response);

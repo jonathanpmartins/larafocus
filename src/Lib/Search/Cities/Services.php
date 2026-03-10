@@ -9,7 +9,10 @@ use Larafocus\Api;
 
 class Services extends Api
 {
-    public function __construct(protected string $cityCode) {}
+    public function __construct(protected string $cityCode)
+    {
+        parent::__construct();
+    }
 
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response

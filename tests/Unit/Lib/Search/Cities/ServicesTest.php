@@ -1,6 +1,9 @@
 <?php
 
 use Larafocus\Focus;
+use Larafocus\Lib\Search\Cities\Services;
+
+covers(Services::class);
 
 test('list method', function () {
     $response = Focus::search()

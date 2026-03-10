@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Http;
 use Larafocus\Focus;
 use Larafocus\Lib\Companies;
+
+covers(Focus::class);
 use Larafocus\Lib\Hooks;
 use Larafocus\Lib\Nfse;
 use Larafocus\Lib\Nfsen;
@@ -13,6 +15,13 @@ beforeEach(function () {
     Focus::$environment = null;
     Focus::$useMasterKey = false;
     Focus::$token = null;
+});
+
+test('default values are correct', function () {
+    expect(Focus::$timeout)->toBe(60)
+        ->and(Focus::$environment)->toBeNull()
+        ->and(Focus::$useMasterKey)->toBeFalse()
+        ->and(Focus::$token)->toBeNull();
 });
 
 test('timeout sets timeout and returns Focus instance', function () {

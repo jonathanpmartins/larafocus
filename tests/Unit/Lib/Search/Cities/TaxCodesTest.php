@@ -1,6 +1,9 @@
 <?php
 
 use Larafocus\Focus;
+use Larafocus\Lib\Search\Cities\TaxCodes;
+
+covers(TaxCodes::class);
 
 test('list method', function () {
     $response = Focus::search()
