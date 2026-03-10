@@ -7,7 +7,7 @@ test('list method', function ()
     $response = Focus::companies()->list();
     $this->assertRequest('GET', '/empresas', $response);
 
-    $response = Focus::companies()->list([], 10);
+    $response = Focus::companies()->list(10);
     $this->assertRequest('GET', '/empresas?offset=10', $response);
 });
 
