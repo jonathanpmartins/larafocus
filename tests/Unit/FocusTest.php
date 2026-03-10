@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Larafocus\Focus;
 use Larafocus\Lib\Companies;
 use Larafocus\Lib\Hooks;
@@ -21,6 +22,13 @@ test('timeout sets timeout and returns Focus instance', function () {
         ->and(Focus::$timeout)->toBe(30);
 });
 
+test('timeout uses default value', function () {
+    Focus::$timeout = 999;
+    Focus::timeout();
+
+    expect(Focus::$timeout)->toBe(60);
+});
+
 test('environment sets environment and returns Focus instance', function () {
     $result = Focus::environment('production');
 
@@ -28,11 +36,25 @@ test('environment sets environment and returns Focus instance', function () {
         ->and(Focus::$environment)->toBe('production');
 });
 
+test('environment defaults to null', function () {
+    Focus::$environment = 'production';
+    Focus::environment();
+
+    expect(Focus::$environment)->toBeNull();
+});
+
 test('useMasterKey sets flag and returns Focus instance', function () {
     $result = Focus::useMasterKey();
 
     expect($result)->toBeInstanceOf(Focus::class)
         ->and(Focus::$useMasterKey)->toBeTrue();
+});
+
+test('useMasterKey can be set to false', function () {
+    Focus::useMasterKey(true);
+    Focus::useMasterKey(false);
+
+    expect(Focus::$useMasterKey)->toBeFalse();
 });
 
 test('token sets token and returns Focus instance', function () {
@@ -53,9 +75,7 @@ test('getEnv returns config environment when static is null', function () {
 });
 
 test('getEndpoint returns endpoint from config', function () {
-    $endpoint = Focus::getEndpoint();
-
-    expect($endpoint)->toBe('https://homologacao.focusnfe.com.br');
+    expect(Focus::getEndpoint())->toBe('https://homologacao.focusnfe.com.br');
 });
 
 test('nfse returns Nfse instance', function () {
@@ -76,4 +96,30 @@ test('search returns Search instance', function () {
 
 test('companies returns Companies instance', function () {
     expect(Focus::companies())->toBeInstanceOf(Companies::class);
+});
+
+test('factory methods pass configuration to instances', function () {
+    Focus::timeout(15);
+    Focus::environment('production');
+    Focus::useMasterKey(true);
+    Focus::token('custom-token');
+
+    Http::fake();
+
+    $response = Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'api.focusnfe.com.br')
+            && str_contains($request->url(), '/nfse/ref-1');
+    });
+});
+
+test('nfsen factory passes configuration', function () {
+    Http::fake();
+
+    $response = Focus::nfsen()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), '/nfsen/ref-1');
+    });
 });

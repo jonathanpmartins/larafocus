@@ -21,7 +21,7 @@ class Companies extends Api
     public function create(array $parameters = []): Response
     {
         $environment = $this->environment ?: config('larafocus.environment');
-        $dryRun = $environment == 'sandbox' ? '?dry_run=1' : '';
+        $dryRun = $environment === 'sandbox' ? '?dry_run=1' : '';
 
         return $this->http()
             ->useMasterKey()
@@ -41,7 +41,7 @@ class Companies extends Api
     public function update(string $id, array $parameters = []): Response
     {
         $environment = $this->environment ?: config('larafocus.environment');
-        $url = $environment == 'sandbox' ? '/empresas?dry_run=1' : '/empresas/'.$id;
+        $url = $environment === 'sandbox' ? '/empresas?dry_run=1' : '/empresas/'.$id;
 
         return $this->http()
             ->useMasterKey()

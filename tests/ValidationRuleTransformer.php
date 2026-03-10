@@ -45,11 +45,11 @@ class ValidationRuleTransformer
             $exploded = explode(':', $validation);
             $validation = $exploded[0];
 
-            if ($validation == 'date_format') {
+            if ($validation === 'date_format') {
                 $other = $exploded[1];
             }
 
-            if ($validation == 'max') {
+            if ($validation === 'max') {
                 $other = $exploded[1];
             }
         }

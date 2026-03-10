@@ -39,7 +39,7 @@ class UnitTestCase extends BaseTestCase
     public function assertRequest(string $method, string $path, Response $response): void
     {
         Http::assertSent(function (Request $request) use ($method, $path) {
-            return $request->method() == $method && str_contains($request->url(), $path);
+            return $request->method() === $method && str_contains($request->url(), $path);
         });
 
         if (str_contains($path, '?')) {
@@ -60,7 +60,7 @@ class UnitTestCase extends BaseTestCase
     public function assertRequestNotSent(string $method, string $path): void
     {
         Http::assertNotSent(function (Request $request) use ($method, $path) {
-            return $request->method() == $method && str_contains($request->url(), $path);
+            return $request->method() === $method && str_contains($request->url(), $path);
         });
     }
 

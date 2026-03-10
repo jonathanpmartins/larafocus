@@ -18,6 +18,12 @@ test('create method', function () {
     $this->assertRequest('POST', '/empresas?dry_run=1', $response);
 });
 
+test('create method defaults to config environment for dry_run', function () {
+    // config environment is 'sandbox' (set in UnitTestCase)
+    $response = Focus::companies()->create();
+    $this->assertRequest('POST', '/empresas?dry_run=1', $response);
+});
+
 test('get method', function () {
     $response = Focus::companies()->get('company-id');
 

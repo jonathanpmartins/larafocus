@@ -79,10 +79,10 @@ class Api
         return new Response(new GuzzleResponse(
             422,
             ['Content-Type' => 'application/json'],
-            (string) json_encode([
+            json_encode([
                 'message' => $validationException->getMessage(),
                 'errors' => $validator->errors()->toArray(),
-            ])
+            ], JSON_THROW_ON_ERROR)
         ));
     }
 }
