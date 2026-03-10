@@ -141,6 +141,70 @@ Larafocus is a Laravel package that integrates with the FocusNFe API. Structure:
 
 ---
 
+### Principle of Least Astonishment (POLA)
+
+- Code should behave **as the reader expects** — no surprises
+- If a method named `save()` also sends an email, that violates POLA
+- Follow conventions: if the codebase does something one way, do it the same way everywhere
+- Unexpected side effects are bugs waiting to happen
+
+---
+
+### Single Level of Abstraction (SLA)
+
+- Each function should operate at **one single level of abstraction**
+- Do not mix high-level orchestration with low-level details in the same function
+- If a function calls `$this->validateOrder()` and then does `strlen($input) > 0`, it mixes abstraction levels
+- Extract low-level details into well-named helper functions
+
+---
+
+### Tell, Don't Ask
+
+- **Tell objects what to do**, do not ask for their state to decide for them
+- Prefer `$order->complete()` over `if ($order->getStatus() === 'paid') { $order->setStatus('completed'); }`
+- Asking for state and making decisions externally breaks encapsulation and scatters logic
+- Related to Law of Demeter but distinct: Demeter limits who you talk to, Tell Don't Ask limits *how* you talk
+
+---
+
+### Humble Object Pattern
+
+- Separate **testable logic** from code that is hard to test (I/O, frameworks, UI)
+- The "humble object" is a thin wrapper containing only the hard-to-test code (HTTP, database, filesystem)
+- The real logic lives in plain objects that are **easy to unit test** without mocks or infrastructure
+- In Laravel: keep controllers humble (thin), push logic into Actions/Services that don't depend on the framework
+
+---
+
+### Immutability
+
+- Prefer **immutable objects** when possible — once created, they do not change
+- Value Objects should always be immutable: a `Money(100, 'BRL')` never changes; you create a new one
+- Immutability eliminates bugs from unexpected state changes and makes code easier to reason about
+- Use `readonly` properties in PHP 8.2+ to enforce immutability at the language level
+
+---
+
+### Polymorphism over Conditionals
+
+- Replace long **if/else or switch chains** with polymorphism
+- Each condition branch becomes a class that implements a common interface
+- Adding a new behavior means adding a new class, not modifying existing conditionals (respects OCP)
+- Use the **Strategy Pattern** to select the right implementation at runtime
+
+---
+
+### Screaming Architecture
+
+- The project structure should **scream its purpose** — looking at the directory layout should reveal the domain, not the framework
+- A healthcare system should look like a healthcare system, not "a Laravel project"
+- Organize by **domain concepts** (Invoices, Companies, Products), not by technical layers alone (Controllers, Models, Services)
+- Frameworks are delivery mechanisms, not the architecture — they should be hidden behind boundaries
+- If a new developer looks at the folder structure and says "this is a Laravel app" instead of "this is a fiscal document system", the architecture is not screaming loud enough
+
+---
+
 ### Boundaries
 
 - Wrap third-party code behind **your own interfaces** — never let external APIs leak into your domain
