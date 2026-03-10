@@ -145,9 +145,7 @@ paths:
               properties:
                 justificativa:
                   type: string
-                  description: |
-                    Motivo do cancelamento. Obrigatório quando o código
-                    de cancelamento é 4.
+                  description: Justificativa do cancelamento (necessária se o código de cancelamento for 4)
             example:
               justificativa: Cancelamento solicitado pelo tomador do serviço
       responses:
@@ -238,6 +236,7 @@ components:
         - codigo_tributacao_nacional_iss
         - descricao_servico
         - valor_servico
+        - tributacao_iss
       properties:
         data_emissao:
           type: string
@@ -252,40 +251,40 @@ components:
         data_competencia:
           type: string
           format: date
-          description: Data de competência da prestação
+          description: Data de competência da prestação do serviço
         emitente_dps:
           type: string
           description: Emitente da DPS
         codigo_municipio_emissora:
           type: integer
-          description: Código IBGE de 7 dígitos da localidade emissora
+          description: Código IBGE de 7 dígitos da localidade emissora da NFS-e
         cnpj_prestador:
           type: string
-          description: CNPJ do prestador do serviço
+          description: Número da inscrição federal (CNPJ) do prestador do serviço
         nif_prestador:
           type: string
-          description: NIF fornecido por órgão de administração tributária
+          description: Número de Identificação Fiscal fornecido por órgão de administração tributária no exterior
         codigo_opcao_simples_nacional:
           type: string
-          description: Situação perante o Simples Nacional
+          description: Situação perante Simples Nacional
         regime_especial_tributacao:
           type: string
           description: Regime Especial de Tributação Municipal
         cnpj_tomador:
           type: string
-          description: CNPJ do tomador do serviço
+          description: Número da inscrição federal (CNPJ) do tomador do serviço
         cpf_tomador:
           type: string
-          description: CPF do tomador do serviço
+          description: Número da inscrição federal (CPF) do tomador do serviço
         nif_tomador:
           type: string
-          description: NIF do tomador
+          description: Número de Identificação Fiscal fornecido por órgão de administração tributária no exterior
         motivo_ausencia_nif_tomador:
           type: string
-          description: Motivo para não informação do NIF do tomador
+          description: Motivo para não informação do NIF
         codigo_municipio_prestacao:
           type: string
-          description: Código IBGE da localidade de prestação do serviço
+          description: Código IBGE de 7 dígitos da localidade da prestação do serviço
         codigo_tributacao_nacional_iss:
           type: string
           description: Código de tributação nacional do ISSQN
@@ -309,7 +308,7 @@ components:
           description: Status do processamento
         cnpj_prestador:
           type: string
-          description: CNPJ do prestador do serviço
+          description: O CNPJ emitente da nota fiscal
         ref:
           type: string
           description: Referência do DPS
@@ -324,36 +323,43 @@ components:
         status:
           type: string
           enum: [autorizado]
+          description: Status atual da NFSe
         cnpj_prestador:
           type: string
+          description: O CNPJ emitente da nota fiscal
         ref:
           type: string
+          description: Referência da NFSe Nacional
         numero_rps:
           type: string
+          description: Número do RPS de controle do Ambiente Nacional
         serie_rps:
           type: string
+          description: A série do RPS de controle do Ambiente Nacional
         tipo_rps:
           type: string
+          description: O tipo do RPS
         numero:
           type: string
-          description: Número da NFSe emitida
+          description: Número da NFSe Nacional
         codigo_verificacao:
           type: string
-          description: Código de verificação
+          description: Código de verificação para consulta da NFSe Nacional, pode ser usado no portal do Ambiente Nacional para consulta
         data_emissao:
           type: string
           format: date-time
+          description: Data da emissão da nota fiscal
         url:
           type: string
           format: uri
-          description: URL para visualização
+          description: URL para a consulta da nota fiscal no portal do Ambiente Nacional
         url_danfse:
           type: string
           format: uri
-          description: URL do DANFSe (PDF)
+          description: URL para acesso e download do DANFSe (versão PDF)
         caminho_xml_nota_fiscal:
           type: string
-          description: Caminho para download do XML
+          description: Caminho para acesso e download do XML da nota fiscal
 
     NfsenCancelada:
       type: object
@@ -362,31 +368,43 @@ components:
         status:
           type: string
           enum: [cancelado]
+          description: Status atual da NFSe
         cnpj_prestador:
           type: string
+          description: O CNPJ emitente da nota fiscal
         ref:
           type: string
+          description: Referência da NFSe Nacional
         numero_rps:
           type: string
+          description: Número do RPS de controle do Ambiente Nacional
         serie_rps:
           type: string
+          description: A série do RPS de controle do Ambiente Nacional
         tipo_rps:
           type: string
+          description: O tipo do RPS
         numero:
           type: string
+          description: Número da NFSe Nacional
         codigo_verificacao:
           type: string
+          description: Código de verificação para consulta da NFSe Nacional, pode ser usado no portal do Ambiente Nacional para consulta
         data_emissao:
           type: string
           format: date-time
+          description: Data da emissão da nota fiscal
         url:
           type: string
           format: uri
+          description: URL para a consulta da nota fiscal no portal do Ambiente Nacional
         caminho_xml_nota_fiscal:
           type: string
+          description: Caminho para acesso e download do XML da nota fiscal
         url_danfse:
           type: string
           format: uri
+          description: URL para acesso e download do DANFSe (versão PDF)
 
     NfsenNegada:
       type: object
@@ -395,36 +413,43 @@ components:
         status:
           type: string
           enum: [negado]
+          description: Status atual da NFSe
         cnpj_prestador:
           type: string
+          description: O CNPJ emitente da nota fiscal
         ref:
           type: string
+          description: Referência da NFSe Nacional
         numero_rps:
           type: string
+          description: Número do RPS de controle do Ambiente Nacional
         serie_rps:
           type: string
+          description: A série do RPS de controle do Ambiente Nacional
         tipo_rps:
           type: string
+          description: O tipo do RPS
         numero:
           type: string
-          description: Número da NFSe emitida
+          description: Número da NFSe Nacional
         codigo_verificacao:
           type: string
-          description: Código de verificação
+          description: Código de verificação para consulta da NFSe Nacional, pode ser usado no portal do Ambiente Nacional para consulta
         data_emissao:
           type: string
           format: date-time
+          description: Data da emissão da nota fiscal
         url:
           type: string
           format: uri
-          description: URL para visualização
+          description: URL para a consulta da nota fiscal no portal do Ambiente Nacional
         url_danfse:
           type: string
           format: uri
-          description: URL do DANFSe (PDF)
+          description: URL para acesso e download do DANFSe (versão PDF)
         caminho_xml_nota_fiscal:
           type: string
-          description: Caminho para download do XML
+          description: Caminho para acesso e download do XML da nota fiscal
 
     NfsenErroAutorizacao:
       type: object
@@ -433,16 +458,22 @@ components:
         status:
           type: string
           enum: [erro_autorizacao]
+          description: Status atual da NFSe
         cnpj_prestador:
           type: string
+          description: O CNPJ emitente da nota fiscal
         ref:
           type: string
+          description: Referência da NFSe Nacional
         numero_rps:
           type: string
+          description: Número do RPS de controle do Ambiente Nacional
         serie_rps:
           type: string
+          description: A série do RPS de controle do Ambiente Nacional
         tipo_rps:
           type: string
+          description: O tipo do RPS
         erros:
           type: array
           items:
@@ -482,11 +513,14 @@ components:
           nullable: true
         event:
           type: string
+          description: Evento monitorado
         cnpj:
           type: string
+          description: CNPJ vinculado ao gatilho
         cpf:
           type: string
           nullable: true
+          description: CPF vinculado ao gatilho
 
     Erro:
       type: object
@@ -496,8 +530,8 @@ components:
           description: Código do erro
         mensagem:
           type: string
-          description: Mensagem descritiva
+          description: Mensagem do erro
         correcao:
           type: string
           nullable: true
-          description: Sugestão de correção
+          description: Correção do erro
