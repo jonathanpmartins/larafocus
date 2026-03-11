@@ -3,6 +3,8 @@
 use Larafocus\Focus;
 use Larafocus\Nfse;
 use Larafocus\Nfse\DTO\Enums\NaturezaOperacao;
+use Larafocus\Nfse\DTO\NfseCancelRequest;
+use Larafocus\Nfse\DTO\NfseEmailRequest;
 use Larafocus\Nfse\DTO\NfseRequest;
 use Larafocus\Nfse\DTO\Prestador;
 use Larafocus\Nfse\DTO\Servico;
@@ -36,13 +38,17 @@ test('get method', function () {
 });
 
 test('cancel method', function () {
-    $response = Focus::nfse()->cancel('unique-reference');
+    $response = Focus::nfse()->cancel('unique-reference', new NfseCancelRequest(
+        justificativa: 'Cancelamento solicitado',
+    ));
 
     $this->assertRequest('DELETE', '/nfse/unique-reference', $response);
 });
 
 test('email method', function () {
-    $response = Focus::nfse()->email('unique-reference');
+    $response = Focus::nfse()->email('unique-reference', new NfseEmailRequest(
+        emails: ['test@example.com'],
+    ));
 
     $this->assertRequest('POST', '/nfse/unique-reference/email', $response);
 });
@@ -91,4 +97,36 @@ test('create method accepts array and converts to DTO', function () {
     ]);
 
     $this->assertRequest('POST', '/nfse?ref=REF-002', $response);
+});
+
+test('cancel method accepts NfseCancelRequest DTO', function () {
+    $request = new NfseCancelRequest(justificativa: 'Cancelamento solicitado pelo tomador');
+
+    $response = Focus::nfse()->cancel('REF-001', $request);
+
+    $this->assertRequest('DELETE', '/nfse/REF-001', $response);
+});
+
+test('cancel method accepts array and converts to DTO', function () {
+    $response = Focus::nfse()->cancel('REF-002', [
+        'justificativa' => 'Cancelamento solicitado pelo tomador',
+    ]);
+
+    $this->assertRequest('DELETE', '/nfse/REF-002', $response);
+});
+
+test('email method accepts NfseEmailRequest DTO', function () {
+    $request = new NfseEmailRequest(emails: ['a@example.com']);
+
+    $response = Focus::nfse()->email('REF-001', $request);
+
+    $this->assertRequest('POST', '/nfse/REF-001/email', $response);
+});
+
+test('email method accepts array and converts to DTO', function () {
+    $response = Focus::nfse()->email('REF-002', [
+        'emails' => ['a@example.com', 'b@example.com'],
+    ]);
+
+    $this->assertRequest('POST', '/nfse/REF-002/email', $response);
 });

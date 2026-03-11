@@ -6,6 +6,7 @@ namespace Larafocus\Nfse\DTO;
 
 use Larafocus\Nfse\DTO\Concerns\ValidatesConstraints;
 
+/** @phpstan-type EnderecoArray array{logradouro?: string|null, tipo_logradouro?: string|null, numero?: string|null, complemento?: string|null, bairro?: string|null, codigo_municipio?: string|null, uf?: string|null, cep?: string|null} */
 readonly class Endereco
 {
     use ValidatesConstraints;
@@ -53,11 +54,7 @@ readonly class Endereco
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     *
-     * @phpstan-param array{logradouro?: string|null, tipo_logradouro?: string|null, numero?: string|null, complemento?: string|null, bairro?: string|null, codigo_municipio?: string|null, uf?: string|null, cep?: string|null} $data
-     */
+    /** @phpstan-param EnderecoArray $data */
     public static function fromArray(array $data): self
     {
         return new self(

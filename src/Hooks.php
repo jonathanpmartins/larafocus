@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Larafocus;
 
+use Larafocus\Hooks\DTO\WebhookRequest;
 use Larafocus\Infrastructure\FocusResponse;
 use Larafocus\Infrastructure\Http;
 
+/**
+ * @phpstan-import-type WebhookRequestArray from WebhookRequest
+ */
 readonly class Hooks
 {
     public function __construct(private Http $http) {}
@@ -16,10 +20,18 @@ readonly class Hooks
         return $this->http->get('/hooks');
     }
 
-    /** @param array<string, mixed> $parameters */
-    public function create(array $parameters = []): FocusResponse
+    /**
+     * @param  WebhookRequest|array<string, mixed>  $parameters
+     *
+     * @phpstan-param WebhookRequest|WebhookRequestArray $parameters
+     */
+    public function create(WebhookRequest|array $parameters): FocusResponse
     {
-        return $this->http->post('/hooks', $parameters);
+        if (is_array($parameters)) {
+            $parameters = WebhookRequest::fromArray($parameters);
+        }
+
+        return $this->http->post('/hooks', $parameters->toArray());
     }
 
     public function get(string $hookId): FocusResponse

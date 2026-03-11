@@ -7,6 +7,7 @@ namespace Larafocus\Nfse\DTO;
 use Larafocus\Nfse\DTO\Concerns\ValidatesConstraints;
 use Larafocus\Nfse\DTO\Enums\MotivoAusenciaNif;
 
+/** @phpstan-type IntermediarioArray array{cpf?: string|null, cnpj?: string|null, nif?: string|null, motivo_ausencia_nif?: string|null, razao_social?: string|null, inscricao_municipal?: string|null} */
 readonly class Intermediario
 {
     use ValidatesConstraints;
@@ -32,11 +33,7 @@ readonly class Intermediario
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     *
-     * @phpstan-param array{cpf?: string|null, cnpj?: string|null, nif?: string|null, motivo_ausencia_nif?: string|null, razao_social?: string|null, inscricao_municipal?: string|null} $data
-     */
+    /** @phpstan-param IntermediarioArray $data */
     public static function fromArray(array $data): self
     {
         return new self(

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Larafocus;
 
+use Larafocus\Companies\DTO\EmpresaRequest;
 use Larafocus\Infrastructure\Environment;
 use Larafocus\Infrastructure\FocusResponse;
 use Larafocus\Infrastructure\Http;
 
+/**
+ * @phpstan-import-type EmpresaRequestArray from EmpresaRequest
+ */
 readonly class Companies
 {
     public function __construct(
@@ -20,12 +24,20 @@ readonly class Companies
         return $this->http->get('/empresas', ['offset' => $offset]);
     }
 
-    /** @param array<string, mixed> $parameters */
-    public function create(array $parameters = []): FocusResponse
+    /**
+     * @param  EmpresaRequest|array<string, mixed>  $parameters
+     *
+     * @phpstan-param EmpresaRequest|EmpresaRequestArray $parameters
+     */
+    public function create(EmpresaRequest|array $parameters = new EmpresaRequest): FocusResponse
     {
+        if (is_array($parameters)) {
+            $parameters = EmpresaRequest::fromArray($parameters);
+        }
+
         $dryRun = $this->environment === Environment::Sandbox ? '?dry_run=1' : '';
 
-        return $this->http->post('/empresas'.$dryRun, $parameters);
+        return $this->http->post('/empresas'.$dryRun, $parameters->toArray());
     }
 
     public function get(string $id): FocusResponse
@@ -33,12 +45,20 @@ readonly class Companies
         return $this->http->get('/empresas/'.urlencode($id));
     }
 
-    /** @param array<string, mixed> $parameters */
-    public function update(string $id, array $parameters = []): FocusResponse
+    /**
+     * @param  EmpresaRequest|array<string, mixed>  $parameters
+     *
+     * @phpstan-param EmpresaRequest|EmpresaRequestArray $parameters
+     */
+    public function update(string $id, EmpresaRequest|array $parameters = new EmpresaRequest): FocusResponse
     {
+        if (is_array($parameters)) {
+            $parameters = EmpresaRequest::fromArray($parameters);
+        }
+
         $url = '/empresas/'.urlencode($id).($this->environment === Environment::Sandbox ? '?dry_run=1' : '');
 
-        return $this->http->put($url, $parameters);
+        return $this->http->put($url, $parameters->toArray());
     }
 
     public function delete(string $id): FocusResponse

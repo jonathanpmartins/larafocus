@@ -1,6 +1,8 @@
 <?php
 
 use Larafocus\Companies;
+use Larafocus\Companies\DTO\EmpresaRequest;
+use Larafocus\Companies\DTO\Enums\RegimeTributario;
 use Larafocus\Focus;
 use Larafocus\Infrastructure\Environment;
 
@@ -51,6 +53,46 @@ test('update method', function () {
         ->update('company-id');
 
     $this->assertRequest('PUT', '/empresas/company-id?dry_run=1', $response);
+});
+
+test('create method accepts EmpresaRequest DTO', function () {
+    $request = new EmpresaRequest(
+        nome: 'Empresa Teste',
+        cnpj: '12345678000195',
+        regime_tributario: RegimeTributario::SimplesNacional,
+    );
+
+    $response = Focus::setup(environment: Environment::Production)->companies()->create($request);
+
+    $this->assertRequest('POST', '/empresas', $response);
+});
+
+test('create method accepts array and converts to DTO', function () {
+    $response = Focus::setup(environment: Environment::Production)->companies()->create([
+        'nome' => 'Empresa Teste',
+        'cnpj' => '12345678000195',
+        'regime_tributario' => 1,
+    ]);
+
+    $this->assertRequest('POST', '/empresas', $response);
+});
+
+test('update method accepts EmpresaRequest DTO', function () {
+    $request = new EmpresaRequest(nome: 'Novo Nome');
+
+    $response = Focus::setup(environment: Environment::Production)
+        ->companies()
+        ->update('company-id', $request);
+
+    $this->assertRequest('PUT', '/empresas/company-id', $response);
+});
+
+test('update method accepts array and converts to DTO', function () {
+    $response = Focus::setup(environment: Environment::Production)
+        ->companies()
+        ->update('company-id', ['nome' => 'Novo Nome']);
+
+    $this->assertRequest('PUT', '/empresas/company-id', $response);
 });
 
 test('delete method', function () {

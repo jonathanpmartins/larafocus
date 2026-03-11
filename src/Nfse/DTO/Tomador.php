@@ -7,6 +7,11 @@ namespace Larafocus\Nfse\DTO;
 use Larafocus\Nfse\DTO\Concerns\ValidatesConstraints;
 use Larafocus\Nfse\DTO\Enums\MotivoAusenciaNif;
 
+/**
+ * @phpstan-import-type EnderecoArray from Endereco
+ *
+ * @phpstan-type TomadorArray array{cpf?: string|null, cnpj?: string|null, razao_social?: string|null, nif?: string|null, motivo_ausencia_nif?: string|null, inscricao_municipal?: string|null, email?: string|null, telefone?: string|null, endereco?: EnderecoArray|null}
+ */
 readonly class Tomador
 {
     use ValidatesConstraints;
@@ -43,11 +48,7 @@ readonly class Tomador
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     *
-     * @phpstan-param array{cpf?: string|null, cnpj?: string|null, razao_social?: string|null, nif?: string|null, motivo_ausencia_nif?: string|null, inscricao_municipal?: string|null, email?: string|null, telefone?: string|null, endereco?: array{logradouro?: string|null, tipo_logradouro?: string|null, numero?: string|null, complemento?: string|null, bairro?: string|null, codigo_municipio?: string|null, uf?: string|null, cep?: string|null}|null} $data
-     */
+    /** @phpstan-param TomadorArray $data */
     public static function fromArray(array $data): self
     {
         return new self(

@@ -6,6 +6,7 @@ namespace Larafocus\Nfse\DTO;
 
 use Larafocus\Nfse\DTO\Concerns\ValidatesConstraints;
 
+/** @phpstan-type PrestadorArray array{cnpj: string, inscricao_municipal: string, codigo_municipio?: string|null} */
 readonly class Prestador
 {
     use ValidatesConstraints;
@@ -22,11 +23,7 @@ readonly class Prestador
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     *
-     * @phpstan-param array{cnpj: string, inscricao_municipal: string, codigo_municipio?: string|null} $data
-     */
+    /** @phpstan-param PrestadorArray $data */
     public static function fromArray(array $data): self
     {
         return new self(
