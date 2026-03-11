@@ -2,16 +2,18 @@
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Larafocus\Infrastructure\ContentType;
+use Larafocus\Infrastructure\Environment;
 use Larafocus\Infrastructure\Http as LarafocusHttp;
 
 covers(LarafocusHttp::class);
 
-test('get with xml format sets xml content type', function () {
+test('xml content type sets xml headers', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
-        isXml: true,
+        contentType: ContentType::Xml,
     );
 
     $http->get('/nfse/ref-123');
@@ -23,12 +25,12 @@ test('get with xml format sets xml content type', function () {
     });
 });
 
-test('get with pdf format sets pdf content type', function () {
+test('pdf content type sets pdf headers', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
-        isPdf: true,
+        contentType: ContentType::Pdf,
     );
 
     $http->get('/nfse/ref-123');
@@ -40,9 +42,9 @@ test('get with pdf format sets pdf content type', function () {
     });
 });
 
-test('get without xml or pdf sets json content type', function () {
+test('default content type is json', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
     );
@@ -58,7 +60,7 @@ test('get without xml or pdf sets json content type', function () {
 
 test('post sends correct method and data', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
     );
@@ -74,7 +76,7 @@ test('post sends correct method and data', function () {
 
 test('patch sends correct method and data', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
     );
@@ -90,7 +92,7 @@ test('patch sends correct method and data', function () {
 
 test('delete sends correct method', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
     );
@@ -107,14 +109,14 @@ test('default timeout is 60 seconds', function () {
     // Reflection is used here because the timeout property is private and its
     // default value is not observable through Http::fake(). This verifies the
     // safety-critical invariant that the default matches the API's expectation.
-    $http = new LarafocusHttp;
+    $http = new LarafocusHttp(Environment::Sandbox, 'test-token');
 
     expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
 });
 
 test('get passes parameters as query string', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test-token',
         timeout: 60,
     );
@@ -127,11 +129,9 @@ test('get passes parameters as query string', function () {
     });
 });
 
-test('explicit token overrides config token', function () {
-    $this->app['config']->set('larafocus.sandbox.token', 'config-token');
-
+test('token is encoded and sent as basic auth', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'direct-token',
     );
 
@@ -144,8 +144,11 @@ test('explicit token overrides config token', function () {
     });
 });
 
-test('default environment from config', function () {
-    $http = new LarafocusHttp;
+test('sandbox environment uses sandbox endpoint', function () {
+    $http = new LarafocusHttp(
+        environment: Environment::Sandbox,
+        token: 'test-token',
+    );
 
     $http->get('/test');
 
@@ -154,9 +157,22 @@ test('default environment from config', function () {
     });
 });
 
+test('production environment uses production endpoint', function () {
+    $http = new LarafocusHttp(
+        environment: Environment::Production,
+        token: 'test-token',
+    );
+
+    $http->get('/test');
+
+    Http::assertSent(function (Request $request) {
+        return str_contains($request->url(), 'api.focusnfe.com.br');
+    });
+});
+
 test('base url includes v2 prefix', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test',
     );
 
@@ -171,7 +187,7 @@ test('custom endpoint from config', function () {
     $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom.example.com');
 
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test',
     );
 
@@ -182,63 +198,13 @@ test('custom endpoint from config', function () {
     });
 });
 
-test('token from correct environment config key', function () {
-    $this->app['config']->set('larafocus.production.token', 'prod-token-value');
-
-    $http = new LarafocusHttp(
-        environment: 'production',
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('prod-token-value');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
-test('xml uses config token when not provided', function () {
-    $this->app['config']->set('larafocus.sandbox.token', 'xml-config-token');
-
-    $http = new LarafocusHttp(
-        environment: 'sandbox',
-        isXml: true,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('xml-config-token');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
-test('pdf uses config token when not provided', function () {
-    $this->app['config']->set('larafocus.sandbox.token', 'pdf-config-token');
-
-    $http = new LarafocusHttp(
-        environment: 'sandbox',
-        isPdf: true,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('pdf-config-token');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
 test('xml uses correct endpoint from config', function () {
     $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom-xml.example.com');
 
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test',
-        isXml: true,
+        contentType: ContentType::Xml,
     );
 
     $http->get('/test');
@@ -252,9 +218,9 @@ test('pdf uses correct endpoint from config', function () {
     $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom-pdf.example.com');
 
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test',
-        isPdf: true,
+        contentType: ContentType::Pdf,
     );
 
     $http->get('/test');
@@ -264,28 +230,11 @@ test('pdf uses correct endpoint from config', function () {
     });
 });
 
-test('default values use environment token', function () {
-    $this->app['config']->set('larafocus.sandbox.token', 'env-token');
-
-    $http = new LarafocusHttp(
-        environment: 'sandbox',
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('env-token');
-
-        return $request->hasHeader('Content-Type', 'application/json')
-            && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
 test('xml base url includes v2 prefix', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test',
-        isXml: true,
+        contentType: ContentType::Xml,
     );
 
     $http->get('/nfse/ref');
@@ -297,74 +246,14 @@ test('xml base url includes v2 prefix', function () {
 
 test('pdf base url includes v2 prefix', function () {
     $http = new LarafocusHttp(
-        environment: 'sandbox',
+        environment: Environment::Sandbox,
         token: 'test',
-        isPdf: true,
+        contentType: ContentType::Pdf,
     );
 
     $http->get('/nfse/ref');
 
     Http::assertSent(function (Request $request) {
         return str_contains($request->url(), '/v2/nfse/ref');
-    });
-});
-
-test('xml reads token from correct environment config key', function () {
-    $this->app['config']->set('larafocus.production.token', 'prod-xml-token');
-
-    $http = new LarafocusHttp(
-        environment: 'production',
-        isXml: true,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('prod-xml-token');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
-test('pdf reads token from correct environment config key', function () {
-    $this->app['config']->set('larafocus.production.token', 'prod-pdf-token');
-
-    $http = new LarafocusHttp(
-        environment: 'production',
-        isPdf: true,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('prod-pdf-token');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
-test('xml default environment from config', function () {
-    $http = new LarafocusHttp(
-        token: 'test',
-        isXml: true,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'homologacao.focusnfe.com.br');
-    });
-});
-
-test('pdf default environment from config', function () {
-    $http = new LarafocusHttp(
-        token: 'test',
-        isPdf: true,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'homologacao.focusnfe.com.br');
     });
 });

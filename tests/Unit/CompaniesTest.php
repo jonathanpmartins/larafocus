@@ -2,6 +2,7 @@
 
 use Larafocus\Companies;
 use Larafocus\Focus;
+use Larafocus\Infrastructure\Environment;
 
 covers(Companies::class);
 
@@ -19,10 +20,10 @@ test('list method', function () {
 });
 
 test('create method', function () {
-    $response = Focus::setup(environment: 'production')->companies()->create();
+    $response = Focus::setup(environment: Environment::Production)->companies()->create();
     $this->assertRequest('POST', '/empresas', $response);
 
-    $response = Focus::setup(environment: 'sandbox')->companies()->create();
+    $response = Focus::setup(environment: Environment::Sandbox)->companies()->create();
     $this->assertRequest('POST', '/empresas?dry_run=1', $response);
 });
 
@@ -39,13 +40,13 @@ test('get method', function () {
 });
 
 test('update method', function () {
-    $response = Focus::setup(environment: 'production')
+    $response = Focus::setup(environment: Environment::Production)
         ->companies()
         ->update('company-id');
 
     $this->assertRequest('PATCH', '/empresas/company-id', $response);
 
-    $response = Focus::setup(environment: 'sandbox')
+    $response = Focus::setup(environment: Environment::Sandbox)
         ->companies()
         ->update('company-id');
 

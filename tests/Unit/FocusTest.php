@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Http;
 use Larafocus\Companies;
 use Larafocus\Focus;
 use Larafocus\Hooks;
+use Larafocus\Infrastructure\Environment;
 use Larafocus\Infrastructure\FocusManager;
 use Larafocus\Nfse;
 use Larafocus\Nfsen;
@@ -20,30 +21,28 @@ test('default values are correct', function () {
         ->and($manager->getMasterToken())->toBeNull();
 });
 
-test('setup sets all values and returns instance', function () {
+test('setup returns new immutable instance with configured values', function () {
     $result = Focus::setup(
         timeout: 30,
-        environment: 'production',
+        environment: Environment::Production,
         token: 'my-token',
         masterToken: 'master',
     );
 
     expect($result)->toBeInstanceOf(FocusManager::class)
         ->and($result->getTimeout())->toBe(30)
-        ->and($result->getEnvironment())->toBe('production')
+        ->and($result->getEnvironment())->toBe(Environment::Production)
         ->and($result->getToken())->toBe('my-token')
         ->and($result->getMasterToken())->toBe('master');
 });
 
-test('setup resets all values to defaults', function () {
+test('setup does not mutate the singleton', function () {
     Focus::setup(
         timeout: 30,
-        environment: 'production',
+        environment: Environment::Production,
         token: 'my-token',
         masterToken: 'master',
     );
-
-    Focus::setup();
 
     $manager = app(FocusManager::class);
 
@@ -51,6 +50,16 @@ test('setup resets all values to defaults', function () {
         ->and($manager->getEnvironment())->toBeNull()
         ->and($manager->getToken())->toBeNull()
         ->and($manager->getMasterToken())->toBeNull();
+});
+
+test('setup without arguments returns instance with defaults', function () {
+    $result = Focus::setup();
+
+    expect($result)->toBeInstanceOf(FocusManager::class)
+        ->and($result->getTimeout())->toBe(60)
+        ->and($result->getEnvironment())->toBeNull()
+        ->and($result->getToken())->toBeNull()
+        ->and($result->getMasterToken())->toBeNull();
 });
 
 test('nfse returns Nfse instance', function () {
@@ -74,19 +83,48 @@ test('companies returns Companies instance', function () {
 });
 
 test('factory methods pass configuration to instances', function () {
-    Focus::setup(
-        timeout: 15,
-        environment: 'production',
-        token: 'custom-token',
-    );
-
     Http::fake();
 
-    $response = Focus::nfse()->get('ref-1');
+    $response = Focus::setup(
+        timeout: 15,
+        environment: Environment::Production,
+        token: 'custom-token',
+    )->nfse()->get('ref-1');
 
     Http::assertSent(function ($request) {
         return str_contains($request->url(), 'api.focusnfe.com.br')
             && str_contains($request->url(), '/nfse/ref-1');
+    });
+});
+
+test('setup token is used instead of config token', function () {
+    Http::fake();
+
+    Focus::setup(
+        environment: Environment::Sandbox,
+        token: 'custom-token',
+    )->nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('custom-token');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('setup masterToken is used instead of config masterToken', function () {
+    Http::fake();
+
+    Focus::setup(
+        environment: Environment::Sandbox,
+        token: 'some-token',
+        masterToken: 'custom-master',
+    )->companies()->get('id');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('custom-master');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });
 });
 

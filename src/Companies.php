@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
+use Larafocus\Infrastructure\Environment;
 use Larafocus\Infrastructure\Http;
 use Larafocus\Infrastructure\HttpConfig;
 
@@ -20,7 +21,7 @@ class Companies
     /** @param array<string, mixed> $parameters */
     public function create(array $parameters = []): Response
     {
-        $dryRun = $this->httpConfig->environment === 'sandbox' ? '?dry_run=1' : '';
+        $dryRun = $this->httpConfig->environment === Environment::Sandbox ? '?dry_run=1' : '';
 
         return $this->http()->post('/empresas'.$dryRun, $parameters);
     }
@@ -33,7 +34,7 @@ class Companies
     /** @param array<string, mixed> $parameters */
     public function update(string $id, array $parameters = []): Response
     {
-        $url = $this->httpConfig->environment === 'sandbox' ? '/empresas?dry_run=1' : '/empresas/'.$id;
+        $url = $this->httpConfig->environment === Environment::Sandbox ? '/empresas?dry_run=1' : '/empresas/'.$id;
 
         return $this->http()->patch($url, $parameters);
     }
@@ -46,9 +47,9 @@ class Companies
     private function http(): Http
     {
         return new Http(
-            timeout: $this->httpConfig->timeout,
-            environment: 'production',
+            environment: Environment::Production,
             token: $this->httpConfig->masterToken,
+            timeout: $this->httpConfig->timeout,
         );
     }
 }

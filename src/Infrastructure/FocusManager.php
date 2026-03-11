@@ -10,27 +10,22 @@ use Larafocus\Nfse;
 use Larafocus\Nfsen;
 use Larafocus\Search;
 
-class FocusManager
+readonly class FocusManager
 {
     public function __construct(
         private int $timeout = 60,
-        private ?string $environment = null,
+        private ?Environment $environment = null,
         private ?string $token = null,
         private ?string $masterToken = null,
     ) {}
 
     public function setup(
         int $timeout = 60,
-        ?string $environment = null,
+        ?Environment $environment = null,
         ?string $token = null,
         ?string $masterToken = null,
     ): self {
-        $this->timeout = $timeout;
-        $this->environment = $environment;
-        $this->token = $token;
-        $this->masterToken = $masterToken;
-
-        return $this;
+        return new self($timeout, $environment, $token, $masterToken);
     }
 
     public function getTimeout(): int
@@ -38,7 +33,7 @@ class FocusManager
         return $this->timeout;
     }
 
-    public function getEnvironment(): ?string
+    public function getEnvironment(): ?Environment
     {
         return $this->environment;
     }
@@ -80,13 +75,13 @@ class FocusManager
 
     private function buildConfig(): HttpConfig
     {
-        $environment = $this->environment ?: config()->string('larafocus.environment');
+        $environment = $this->environment ?? Environment::from(config()->string('larafocus.environment'));
 
         return new HttpConfig(
             timeout: $this->timeout,
             environment: $environment,
-            token: $this->token ?: config()->string('larafocus.'.$environment.'.token'),
-            masterToken: $this->masterToken ?: config()->string('larafocus.master_token'),
+            token: $this->token ?? config()->string('larafocus.'.$environment->value.'.token'),
+            masterToken: $this->masterToken ?? config()->string('larafocus.master_token'),
         );
     }
 }

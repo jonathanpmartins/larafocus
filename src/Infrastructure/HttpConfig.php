@@ -8,7 +8,7 @@ readonly class HttpConfig
 {
     public function __construct(
         public int $timeout,
-        public string $environment,
+        public Environment $environment,
         public string $token,
         public string $masterToken,
     ) {}

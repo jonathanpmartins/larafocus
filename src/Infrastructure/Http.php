@@ -11,11 +11,10 @@ use Illuminate\Support\Facades\Http as HttpClient;
 readonly class Http
 {
     public function __construct(
+        private Environment $environment,
+        private string $token,
         private int $timeout = 60,
-        private ?string $environment = null,
-        private ?string $token = null,
-        private bool $isXml = false,
-        private bool $isPdf = false,
+        private ContentType $contentType = ContentType::Json,
     ) {}
 
     /** @param array<string, mixed> $parameters */
@@ -44,36 +43,13 @@ readonly class Http
 
     private function buildClient(): PendingRequest
     {
-        $environment = $this->resolveEnvironment();
-        $token = $this->resolveToken($environment);
-        $encodedToken = base64_encode($token);
-        $endpoint = config()->string('larafocus.'.$environment.'.endpoint').config()->string('larafocus.prefix');
+        $encodedToken = base64_encode($this->token);
+        $endpoint = config()->string('larafocus.'.$this->environment->value.'.endpoint').config()->string('larafocus.prefix');
 
         $pendingRequest = HttpClient::withToken($encodedToken, 'Basic')
             ->baseUrl($endpoint)
             ->timeout($this->timeout);
 
-        if ($this->isXml) {
-            return $pendingRequest->contentType('application/xml')
-                ->accept('application/xml');
-        }
-
-        if ($this->isPdf) {
-            return $pendingRequest->contentType('application/pdf')
-                ->accept('application/pdf');
-        }
-
-        return $pendingRequest->contentType('application/json')
-            ->acceptJson();
-    }
-
-    private function resolveEnvironment(): string
-    {
-        return $this->environment ?: config()->string('larafocus.environment');
-    }
-
-    private function resolveToken(string $environment): string
-    {
-        return $this->token ?: config()->string('larafocus.'.$environment.'.token');
+        return $this->contentType->applyTo($pendingRequest);
     }
 }
