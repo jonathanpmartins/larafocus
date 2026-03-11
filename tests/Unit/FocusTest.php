@@ -24,10 +24,10 @@ test('default values resolve from config', function () {
     });
 });
 
-test('setup returns new instance with configured values', function () {
+test('using returns new instance with configured values', function () {
     Http::fake();
 
-    Focus::setup(
+    Focus::using(
         timeout: 30,
         environment: Environment::Production,
         token: 'my-token',
@@ -42,10 +42,10 @@ test('setup returns new instance with configured values', function () {
     });
 });
 
-test('setup does not mutate the singleton', function () {
+test('using does not mutate the singleton', function () {
     Http::fake();
 
-    Focus::setup(
+    Focus::using(
         timeout: 30,
         environment: Environment::Production,
         token: 'custom-token',
@@ -59,13 +59,33 @@ test('setup does not mutate the singleton', function () {
     });
 });
 
-test('setup without arguments returns instance with defaults', function () {
+test('using without arguments returns instance with current values', function () {
     Http::fake();
 
-    Focus::setup()->nfse()->get('ref-1');
+    Focus::using()->nfse()->get('ref-1');
 
     Http::assertSent(function ($request) {
         return str_contains($request->url(), 'homologacao.focusnfe.com.br/v2/nfse/ref-1');
+    });
+});
+
+test('using merges with current config values', function () {
+    Http::fake();
+
+    Focus::config(timeout: 120, environment: Environment::Production, token: 'base-token');
+
+    $nfse = Focus::using(token: 'override-token')->nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(120);
+
+    $nfse->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('override-token:');
+
+        return str_contains($request->url(), 'api.focusnfe.com.br/v2/nfse/ref-1')
+            && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });
 });
 
@@ -88,7 +108,7 @@ test('companies returns Companies instance', function () {
 test('factory methods pass configuration to instances', function () {
     Http::fake();
 
-    Focus::setup(
+    Focus::using(
         timeout: 15,
         environment: Environment::Production,
         token: 'custom-token',
@@ -99,10 +119,10 @@ test('factory methods pass configuration to instances', function () {
     });
 });
 
-test('setup token is used instead of config token', function () {
+test('using token is used instead of config token', function () {
     Http::fake();
 
-    Focus::setup(
+    Focus::using(
         environment: Environment::Sandbox,
         token: 'custom-token',
     )->nfse()->get('ref-1');
@@ -114,10 +134,10 @@ test('setup token is used instead of config token', function () {
     });
 });
 
-test('setup masterToken is used instead of config masterToken', function () {
+test('using masterToken is used instead of config masterToken', function () {
     Http::fake();
 
-    Focus::setup(
+    Focus::using(
         environment: Environment::Sandbox,
         token: 'some-token',
         masterToken: 'custom-master',
@@ -137,7 +157,7 @@ test('facade resolves to FocusManager', function () {
 test('companies always uses production endpoint with prefix', function () {
     Http::fake();
 
-    Focus::setup(
+    Focus::using(
         environment: Environment::Sandbox,
         token: 'some-token',
         masterToken: 'master',
@@ -158,10 +178,10 @@ test('default timeout is 60 seconds', function () {
     expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
 });
 
-test('setup default timeout is 60 seconds', function () {
-    // Same reflection justification as above — verifies setup() preserves
+test('using default timeout is 60 seconds', function () {
+    // Same reflection justification as above — verifies using() preserves
     // the default timeout when no explicit value is provided.
-    $nfse = Focus::setup()->nfse();
+    $nfse = Focus::using()->nfse();
     $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
 
     expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
@@ -174,5 +194,134 @@ test('base url includes endpoint and prefix for configured environment', functio
 
     Http::assertSent(function ($request) {
         return str_contains($request->url(), 'homologacao.focusnfe.com.br/v2/nfse/ref-1');
+    });
+});
+
+test('config mutates the singleton', function () {
+    Http::fake();
+
+    Focus::config(environment: Environment::Production, token: 'persistent-token');
+
+    Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('persistent-token:');
+
+        return str_contains($request->url(), 'api.focusnfe.com.br/v2/nfse/ref-1')
+            && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('config returns the same instance', function () {
+    $manager = Focus::getFacadeRoot();
+    $returned = Focus::config(timeout: 120);
+
+    expect($returned)->toBe($manager);
+});
+
+test('config persists across multiple calls', function () {
+    Http::fake();
+
+    Focus::config(timeout: 120);
+    Focus::config(environment: Environment::Production, token: 'my-token');
+
+    $nfse = Focus::nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(120);
+
+    $nfse->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'api.focusnfe.com.br/v2/nfse/ref-1');
+    });
+});
+
+test('config masterToken persists for companies', function () {
+    Http::fake();
+
+    Focus::config(masterToken: 'config-master');
+
+    Focus::companies()->get('id');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('config-master:');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('using inherits timeout from base instance', function () {
+    Focus::config(timeout: 90);
+
+    $nfse = Focus::using(token: 'override')->nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(90);
+});
+
+test('using overrides timeout from base instance', function () {
+    Focus::config(timeout: 90);
+
+    $nfse = Focus::using(timeout: 45)->nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(45);
+});
+
+test('config resets token to null to fall back to config default', function () {
+    Http::fake();
+
+    Focus::config(token: 'custom-token');
+    Focus::config(token: null);
+
+    Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('test-token:');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('config resets environment to null to fall back to config default', function () {
+    Http::fake();
+
+    Focus::config(environment: Environment::Production);
+    Focus::config(environment: null);
+
+    Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'homologacao.focusnfe.com.br');
+    });
+});
+
+test('config without arguments does not change any values', function () {
+    Http::fake();
+
+    Focus::config(token: 'keep-this');
+    Focus::config();
+
+    Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('keep-this:');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('using resets token to null to fall back to config default', function () {
+    Http::fake();
+
+    Focus::config(token: 'custom-token');
+
+    Focus::using(token: null)->nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('test-token:');
+
+        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });
 });

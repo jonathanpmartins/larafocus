@@ -22,10 +22,10 @@ test('list method', function () {
 });
 
 test('create method', function () {
-    $response = Focus::setup(environment: Environment::Production)->companies()->create();
+    $response = Focus::using(environment: Environment::Production)->companies()->create();
     $this->assertRequest('POST', '/empresas', $response);
 
-    $response = Focus::setup(environment: Environment::Sandbox)->companies()->create();
+    $response = Focus::using(environment: Environment::Sandbox)->companies()->create();
     $this->assertRequest('POST', '/empresas?dry_run=1', $response);
 });
 
@@ -42,13 +42,13 @@ test('get method', function () {
 });
 
 test('update method', function () {
-    $response = Focus::setup(environment: Environment::Production)
+    $response = Focus::using(environment: Environment::Production)
         ->companies()
         ->update('company-id');
 
     $this->assertRequest('PUT', '/empresas/company-id', $response);
 
-    $response = Focus::setup(environment: Environment::Sandbox)
+    $response = Focus::using(environment: Environment::Sandbox)
         ->companies()
         ->update('company-id');
 
@@ -62,13 +62,13 @@ test('create method accepts EmpresaRequest DTO', function () {
         regime_tributario: RegimeTributario::SimplesNacional,
     );
 
-    $response = Focus::setup(environment: Environment::Production)->companies()->create($request);
+    $response = Focus::using(environment: Environment::Production)->companies()->create($request);
 
     $this->assertRequest('POST', '/empresas', $response);
 });
 
 test('create method accepts array and converts to DTO', function () {
-    $response = Focus::setup(environment: Environment::Production)->companies()->create([
+    $response = Focus::using(environment: Environment::Production)->companies()->create([
         'nome' => 'Empresa Teste',
         'cnpj' => '12345678000195',
         'regime_tributario' => 1,
@@ -80,7 +80,7 @@ test('create method accepts array and converts to DTO', function () {
 test('update method accepts EmpresaRequest DTO', function () {
     $request = new EmpresaRequest(nome: 'Novo Nome');
 
-    $response = Focus::setup(environment: Environment::Production)
+    $response = Focus::using(environment: Environment::Production)
         ->companies()
         ->update('company-id', $request);
 
@@ -88,7 +88,7 @@ test('update method accepts EmpresaRequest DTO', function () {
 });
 
 test('update method accepts array and converts to DTO', function () {
-    $response = Focus::setup(environment: Environment::Production)
+    $response = Focus::using(environment: Environment::Production)
         ->companies()
         ->update('company-id', ['nome' => 'Novo Nome']);
 
