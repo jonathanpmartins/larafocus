@@ -9,6 +9,11 @@
             "email": "web@jonathanmartins.com.br"
         }
     ],
+    "homepage": "https://github.com/jonathanpmartins/larafocus",
+    "support": {
+        "issues": "https://github.com/jonathanpmartins/larafocus/issues",
+        "source": "https://github.com/jonathanpmartins/larafocus"
+    },
     "keywords": [
         "focus",
         "nfse",

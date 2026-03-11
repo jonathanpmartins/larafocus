@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+        laravel: ['11.*', '12.*']
+
+    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, curl
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: |
+          composer require "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-interaction --no-update
+          composer install --prefer-dist --no-interaction
+
+      - name: Run tests
+        run: ./vendor/bin/pest --coverage --min=100 --parallel
+
+  quality:
+    runs-on: ubuntu-latest
+    name: Quality checks
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: json, curl
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Type coverage
+        run: ./vendor/bin/pest --type-coverage --min=100
+
+      - name: PHPStan
+        run: ./vendor/bin/phpstan analyse
+
+      - name: Psalm taint analysis
+        run: ./vendor/bin/psalm --taint-analysis
+
+      - name: Rector
+        run: ./vendor/bin/rector --dry-run
+
+      - name: Pint
+        run: ./vendor/bin/pint --test
+
+  mutations:
+    runs-on: ubuntu-latest
+    name: Mutation testing
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: json, curl
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Mutation tests
+        run: ./vendor/bin/pest --mutate --min=100 --parallel
