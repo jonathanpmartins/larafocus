@@ -7,6 +7,7 @@ namespace Larafocus\Infrastructure;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http as HttpClient;
+use InvalidArgumentException;
 
 readonly class Http
 {
@@ -15,7 +16,11 @@ readonly class Http
         private string $token,
         private int $timeout = 60,
         private ContentType $contentType = ContentType::Json,
-    ) {}
+    ) {
+        if (trim($this->token) === '') {
+            throw new InvalidArgumentException('API token must not be empty. Set your token in the LARAFOCUS_SANDBOX_TOKEN or LARAFOCUS_PRODUCTION_TOKEN environment variable.');
+        }
+    }
 
     /** @param array<string, mixed> $parameters */
     public function get(string $uri, array $parameters = []): Response

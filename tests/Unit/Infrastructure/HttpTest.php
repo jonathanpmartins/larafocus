@@ -140,6 +140,20 @@ test('token is encoded and sent as basic auth', function () {
     });
 });
 
+test('throws exception when token is empty', function () {
+    new LarafocusHttp(
+        baseUrl: 'https://example.com/v2',
+        token: '',
+    );
+})->throws(InvalidArgumentException::class, 'API token must not be empty');
+
+test('throws exception when token is whitespace only', function () {
+    new LarafocusHttp(
+        baseUrl: 'https://example.com/v2',
+        token: '   ',
+    );
+})->throws(InvalidArgumentException::class, 'API token must not be empty');
+
 test('request url combines base url and uri path', function () {
     $http = new LarafocusHttp(
         baseUrl: 'https://custom.example.com/v2',

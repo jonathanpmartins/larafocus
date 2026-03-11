@@ -19,6 +19,7 @@ class UnitTestCase extends BaseTestCase
 
         $this->app['config']->set('larafocus.environment', 'sandbox');
         $this->app['config']->set('larafocus.sandbox.token', env('LARAFOCUS_SANDBOX_TOKEN', 'test-token'));
+        $this->app['config']->set('larafocus.master_token', env('LARAFOCUS_MASTER_TOKEN', 'test-master-token'));
 
         $this->app->forgetInstance(FocusManager::class);
         \Larafocus\Focus::clearResolvedInstance(FocusManager::class);
