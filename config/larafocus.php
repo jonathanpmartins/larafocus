@@ -10,7 +10,7 @@ return [
     |
     */
     'prefix' => env('LARAFOCUS_PREFIX', '/v2'),
-    'environment' => env('LARAFOCUS_ENVIRONMENT', 'production'),
+    'environment' => env('LARAFOCUS_ENVIRONMENT', 'sandbox'),
     'master_token' => env('LARAFOCUS_MASTER_TOKEN', ''),
     'sandbox' => [
         'endpoint' => env('LARAFOCUS_SANDBOX_ENDPOINT', 'https://homologacao.focusnfe.com.br'),
