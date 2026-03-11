@@ -28,20 +28,20 @@ class Companies
 
     public function get(string $id): Response
     {
-        return $this->http()->get('/empresas/'.$id);
+        return $this->http()->get('/empresas/'.urlencode($id));
     }
 
     /** @param array<string, mixed> $parameters */
     public function update(string $id, array $parameters = []): Response
     {
-        $url = $this->httpConfig->environment === Environment::Sandbox ? '/empresas?dry_run=1' : '/empresas/'.$id;
+        $url = '/empresas/'.urlencode($id).($this->httpConfig->environment === Environment::Sandbox ? '?dry_run=1' : '');
 
         return $this->http()->patch($url, $parameters);
     }
 
     public function delete(string $id): Response
     {
-        return $this->http()->delete('/empresas/'.$id);
+        return $this->http()->delete('/empresas/'.urlencode($id));
     }
 
     private function http(): Http

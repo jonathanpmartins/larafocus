@@ -20,11 +20,11 @@ class TaxCodes
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
-        return $this->http()->get('/municipios/'.$this->cityCode.'/codigos_tributarios_municipio', $parameters);
+        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/codigos_tributarios_municipio', $parameters);
     }
 
     public function get(string $taxCode): Response
     {
-        return $this->http()->get('/municipios/'.$this->cityCode.'/codigos_tributarios_municipio/'.$taxCode);
+        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/codigos_tributarios_municipio/'.urlencode($taxCode));
     }
 }

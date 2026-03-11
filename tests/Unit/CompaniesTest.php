@@ -50,7 +50,7 @@ test('update method', function () {
         ->companies()
         ->update('company-id');
 
-    $this->assertRequest('PATCH', '/empresas?dry_run=1', $response);
+    $this->assertRequest('PATCH', '/empresas/company-id?dry_run=1', $response);
 });
 
 test('delete method', function () {

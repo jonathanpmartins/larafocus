@@ -20,11 +20,11 @@ class Services
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
-        return $this->http()->get('/municipios/'.$this->cityCode.'/itens_lista_servico', $parameters);
+        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico', $parameters);
     }
 
     public function get(string $serviceCode): Response
     {
-        return $this->http()->get('/municipios/'.$this->cityCode.'/itens_lista_servico/'.$serviceCode);
+        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico/'.urlencode($serviceCode));
     }
 }

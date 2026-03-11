@@ -27,11 +27,11 @@ class Hooks
 
     public function get(string $hookId): Response
     {
-        return $this->http()->get('/hooks/'.$hookId);
+        return $this->http()->get('/hooks/'.urlencode($hookId));
     }
 
     public function delete(string $hookId): Response
     {
-        return $this->http()->delete('/hooks/'.$hookId);
+        return $this->http()->delete('/hooks/'.urlencode($hookId));
     }
 }

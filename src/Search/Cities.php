@@ -24,7 +24,7 @@ class Cities
 
     public function get(string $cityCode): Response
     {
-        return $this->http()->get('/municipios/'.$cityCode);
+        return $this->http()->get('/municipios/'.urlencode($cityCode));
     }
 
     public function servicesFor(string $cityCode): Services
