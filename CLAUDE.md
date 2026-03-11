@@ -34,6 +34,10 @@ Type coverage must remain at 100%. Any new or changed code must include complete
 
 Larafocus is a Laravel package that integrates with the FocusNFe API. Structure: `src/` contains the main logic, `openapi/` the API specs, `config/` configuration, `tests/` tests.
 
+## Documentation
+
+Whenever the public API changes (new methods, renamed parameters, changed behavior), update `README.md` to reflect those changes.
+
 ---
 
 ## Clean Architecture Principles (Uncle Bob)
