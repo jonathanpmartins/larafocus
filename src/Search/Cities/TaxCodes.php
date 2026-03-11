@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace Larafocus\Search\Cities;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\Api;
+use Larafocus\Infrastructure\HasHttp;
+use Larafocus\Infrastructure\HttpConfig;
 
-class TaxCodes extends Api
+class TaxCodes
 {
-    public function __construct(protected string $cityCode)
-    {
-        parent::__construct();
-    }
+    use HasHttp;
+
+    public function __construct(
+        private readonly HttpConfig $httpConfig,
+        private readonly string $cityCode,
+    ) {}
 
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response

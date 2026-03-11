@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\Api;
+use Larafocus\Infrastructure\HasHttp;
+use Larafocus\Infrastructure\HttpConfig;
 
-class Hooks extends Api
+class Hooks
 {
+    use HasHttp;
+
+    public function __construct(private readonly HttpConfig $httpConfig) {}
+
     public function list(): Response
     {
         return $this->http()->get('/hooks');

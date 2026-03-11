@@ -7,11 +7,12 @@ use Larafocus\Infrastructure\Http as LarafocusHttp;
 covers(LarafocusHttp::class);
 
 test('get with xml format sets xml content type', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60)
-        ->isXml();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+        isXml: true,
+    );
 
     $http->get('/nfse/ref-123');
 
@@ -23,11 +24,12 @@ test('get with xml format sets xml content type', function () {
 });
 
 test('get with pdf format sets pdf content type', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60)
-        ->isPdf();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+        isPdf: true,
+    );
 
     $http->get('/nfse/ref-123');
 
@@ -39,10 +41,11 @@ test('get with pdf format sets pdf content type', function () {
 });
 
 test('get without xml or pdf sets json content type', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60);
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+    );
 
     $http->get('/nfse/ref-123');
 
@@ -54,10 +57,11 @@ test('get without xml or pdf sets json content type', function () {
 });
 
 test('post sends correct method and data', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60);
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+    );
 
     $http->post('/nfse', ['key' => 'value']);
 
@@ -69,10 +73,11 @@ test('post sends correct method and data', function () {
 });
 
 test('patch sends correct method and data', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60);
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+    );
 
     $http->patch('/empresas/123', ['name' => 'test']);
 
@@ -84,10 +89,11 @@ test('patch sends correct method and data', function () {
 });
 
 test('delete sends correct method', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60);
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+    );
 
     $http->delete('/nfse/ref-123', ['justificativa' => 'test']);
 
@@ -95,17 +101,6 @@ test('delete sends correct method', function () {
         return $request->method() === 'DELETE'
             && str_contains($request->url(), '/nfse/ref-123');
     });
-});
-
-test('setter methods return same instance for chaining', function () {
-    $http = new LarafocusHttp;
-
-    expect($http->timeout(30))->toBe($http);
-    expect($http->environment('sandbox'))->toBe($http);
-    expect($http->useMasterKey(true))->toBe($http);
-    expect($http->token('token'))->toBe($http);
-    expect($http->isXml())->toBe($http);
-    expect($http->isPdf())->toBe($http);
 });
 
 test('default timeout is 60 seconds', function () {
@@ -118,10 +113,11 @@ test('default timeout is 60 seconds', function () {
 });
 
 test('get passes parameters as query string', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test-token')
-        ->timeout(60);
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test-token',
+        timeout: 60,
+    );
 
     $http->get('/municipios', ['codigo' => '1234']);
 
@@ -134,9 +130,10 @@ test('get passes parameters as query string', function () {
 test('explicit token overrides config token', function () {
     $this->app['config']->set('larafocus.sandbox.token', 'config-token');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('direct-token');
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'direct-token',
+    );
 
     $http->get('/test');
 
@@ -158,9 +155,10 @@ test('default environment from config', function () {
 });
 
 test('base url includes v2 prefix', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test');
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test',
+    );
 
     $http->get('/nfse/ref');
 
@@ -172,9 +170,10 @@ test('base url includes v2 prefix', function () {
 test('custom endpoint from config', function () {
     $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom.example.com');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test');
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test',
+    );
 
     $http->get('/test');
 
@@ -186,8 +185,9 @@ test('custom endpoint from config', function () {
 test('token from correct environment config key', function () {
     $this->app['config']->set('larafocus.production.token', 'prod-token-value');
 
-    $http = (new LarafocusHttp)
-        ->environment('production');
+    $http = new LarafocusHttp(
+        environment: 'production',
+    );
 
     $http->get('/test');
 
@@ -201,9 +201,10 @@ test('token from correct environment config key', function () {
 test('xml uses config token when not provided', function () {
     $this->app['config']->set('larafocus.sandbox.token', 'xml-config-token');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->isXml();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        isXml: true,
+    );
 
     $http->get('/test');
 
@@ -217,9 +218,10 @@ test('xml uses config token when not provided', function () {
 test('pdf uses config token when not provided', function () {
     $this->app['config']->set('larafocus.sandbox.token', 'pdf-config-token');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->isPdf();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        isPdf: true,
+    );
 
     $http->get('/test');
 
@@ -233,10 +235,11 @@ test('pdf uses config token when not provided', function () {
 test('xml uses correct endpoint from config', function () {
     $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom-xml.example.com');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test')
-        ->isXml();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test',
+        isXml: true,
+    );
 
     $http->get('/test');
 
@@ -248,10 +251,11 @@ test('xml uses correct endpoint from config', function () {
 test('pdf uses correct endpoint from config', function () {
     $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom-pdf.example.com');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test')
-        ->isPdf();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test',
+        isPdf: true,
+    );
 
     $http->get('/test');
 
@@ -260,43 +264,12 @@ test('pdf uses correct endpoint from config', function () {
     });
 });
 
-test('master token used when useMasterKey is true', function () {
-    $this->app['config']->set('larafocus.master_token', 'master-secret');
-
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->useMasterKey();
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('master-secret');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
-test('environment token used when useMasterKey is false', function () {
-    $this->app['config']->set('larafocus.sandbox.token', 'sandbox-secret');
-
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->useMasterKey(false);
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('sandbox-secret');
-
-        return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
-    });
-});
-
 test('default values use environment token', function () {
     $this->app['config']->set('larafocus.sandbox.token', 'env-token');
 
-    $http = (new LarafocusHttp)
-        ->environment('sandbox');
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+    );
 
     $http->get('/test');
 
@@ -309,10 +282,11 @@ test('default values use environment token', function () {
 });
 
 test('xml base url includes v2 prefix', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test')
-        ->isXml();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test',
+        isXml: true,
+    );
 
     $http->get('/nfse/ref');
 
@@ -322,10 +296,11 @@ test('xml base url includes v2 prefix', function () {
 });
 
 test('pdf base url includes v2 prefix', function () {
-    $http = (new LarafocusHttp)
-        ->environment('sandbox')
-        ->token('test')
-        ->isPdf();
+    $http = new LarafocusHttp(
+        environment: 'sandbox',
+        token: 'test',
+        isPdf: true,
+    );
 
     $http->get('/nfse/ref');
 
@@ -337,9 +312,10 @@ test('pdf base url includes v2 prefix', function () {
 test('xml reads token from correct environment config key', function () {
     $this->app['config']->set('larafocus.production.token', 'prod-xml-token');
 
-    $http = (new LarafocusHttp)
-        ->environment('production')
-        ->isXml();
+    $http = new LarafocusHttp(
+        environment: 'production',
+        isXml: true,
+    );
 
     $http->get('/test');
 
@@ -353,9 +329,10 @@ test('xml reads token from correct environment config key', function () {
 test('pdf reads token from correct environment config key', function () {
     $this->app['config']->set('larafocus.production.token', 'prod-pdf-token');
 
-    $http = (new LarafocusHttp)
-        ->environment('production')
-        ->isPdf();
+    $http = new LarafocusHttp(
+        environment: 'production',
+        isPdf: true,
+    );
 
     $http->get('/test');
 
@@ -367,9 +344,10 @@ test('pdf reads token from correct environment config key', function () {
 });
 
 test('xml default environment from config', function () {
-    $http = (new LarafocusHttp)
-        ->token('test')
-        ->isXml();
+    $http = new LarafocusHttp(
+        token: 'test',
+        isXml: true,
+    );
 
     $http->get('/test');
 
@@ -379,9 +357,10 @@ test('xml default environment from config', function () {
 });
 
 test('pdf default environment from config', function () {
-    $http = (new LarafocusHttp)
-        ->token('test')
-        ->isPdf();
+    $http = new LarafocusHttp(
+        token: 'test',
+        isPdf: true,
+    );
 
     $http->get('/test');
 

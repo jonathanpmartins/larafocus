@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\Api;
+use Larafocus\Infrastructure\HasHttp;
+use Larafocus\Infrastructure\HttpConfig;
 
-class Nfsen extends Api
+class Nfsen
 {
+    use HasHttp;
+
+    public function __construct(private readonly HttpConfig $httpConfig) {}
+
     /** @param array<string, mixed> $parameters */
     public function create(string $reference, array $parameters = []): Response
     {

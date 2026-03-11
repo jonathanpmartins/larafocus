@@ -13,92 +13,80 @@ use Larafocus\Search;
 class FocusManager
 {
     public function __construct(
-        public int $timeout = 60,
-        public ?string $environment = null,
-        public bool $useMasterKey = false,
-        public ?string $token = null,
+        private int $timeout = 60,
+        private ?string $environment = null,
+        private ?string $token = null,
+        private ?string $masterToken = null,
     ) {}
 
-    public function timeout(int $timeoutInSeconds = 60): self
-    {
-        $this->timeout = $timeoutInSeconds;
-
-        return $this;
-    }
-
-    public function environment(?string $environment = null): self
-    {
+    public function setup(
+        int $timeout = 60,
+        ?string $environment = null,
+        ?string $token = null,
+        ?string $masterToken = null,
+    ): self {
+        $this->timeout = $timeout;
         $this->environment = $environment;
-
-        return $this;
-    }
-
-    public function useMasterKey(bool $isTrue = true): self
-    {
-        $this->useMasterKey = $isTrue;
-
-        return $this;
-    }
-
-    public function token(string $token): self
-    {
         $this->token = $token;
+        $this->masterToken = $masterToken;
 
         return $this;
     }
 
-    public function getEnv(): string
+    public function getTimeout(): int
     {
-        return $this->environment ?: config()->string('larafocus.environment');
+        return $this->timeout;
     }
 
-    public function getEndpoint(): string
+    public function getEnvironment(): ?string
     {
-        return config()->string('larafocus.'.$this->getEnv().'.endpoint');
+        return $this->environment;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function getMasterToken(): ?string
+    {
+        return $this->masterToken;
     }
 
     public function nfse(): Nfse
     {
-        return (new Nfse)
-            ->useMasterKey($this->useMasterKey)
-            ->token($this->token)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Nfse($this->buildConfig());
     }
 
     public function nfsen(): Nfsen
     {
-        return (new Nfsen)
-            ->useMasterKey($this->useMasterKey)
-            ->token($this->token)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Nfsen($this->buildConfig());
     }
 
     public function hooks(): Hooks
     {
-        return (new Hooks)
-            ->useMasterKey($this->useMasterKey)
-            ->token($this->token)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Hooks($this->buildConfig());
     }
 
     public function search(): Search
     {
-        return (new Search)
-            ->useMasterKey($this->useMasterKey)
-            ->token($this->token)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Search($this->buildConfig());
     }
 
     public function companies(): Companies
     {
-        return (new Companies)
-            ->useMasterKey($this->useMasterKey)
-            ->token($this->token)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Companies($this->buildConfig());
+    }
+
+    private function buildConfig(): HttpConfig
+    {
+        $environment = $this->environment ?: config()->string('larafocus.environment');
+
+        return new HttpConfig(
+            timeout: $this->timeout,
+            environment: $environment,
+            token: $this->token ?: config()->string('larafocus.'.$environment.'.token'),
+            masterToken: $this->masterToken ?: config()->string('larafocus.master_token'),
+        );
     }
 }

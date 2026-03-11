@@ -19,10 +19,10 @@ test('list method', function () {
 });
 
 test('create method', function () {
-    $response = Focus::companies()->environment('production')->create();
+    $response = Focus::setup(environment: 'production')->companies()->create();
     $this->assertRequest('POST', '/empresas', $response);
 
-    $response = Focus::companies()->environment('sandbox')->create();
+    $response = Focus::setup(environment: 'sandbox')->companies()->create();
     $this->assertRequest('POST', '/empresas?dry_run=1', $response);
 });
 
@@ -39,14 +39,14 @@ test('get method', function () {
 });
 
 test('update method', function () {
-    $response = Focus::companies()
-        ->environment('production')
+    $response = Focus::setup(environment: 'production')
+        ->companies()
         ->update('company-id');
 
     $this->assertRequest('PATCH', '/empresas/company-id', $response);
 
-    $response = Focus::companies()
-        ->environment('sandbox')
+    $response = Focus::setup(environment: 'sandbox')
+        ->companies()
         ->update('company-id');
 
     $this->assertRequest('PATCH', '/empresas?dry_run=1', $response);

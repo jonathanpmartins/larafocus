@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Larafocus\Search;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\Api;
+use Larafocus\Infrastructure\HasHttp;
+use Larafocus\Infrastructure\HttpConfig;
 use Larafocus\Search\Cities\Services;
 use Larafocus\Search\Cities\TaxCodes;
 
-class Cities extends Api
+class Cities
 {
+    use HasHttp;
+
+    public function __construct(private readonly HttpConfig $httpConfig) {}
+
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
@@ -24,17 +29,11 @@ class Cities extends Api
 
     public function servicesFor(string $cityCode): Services
     {
-        return (new Services($cityCode))
-            ->useMasterKey($this->useMasterKey)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Services($this->httpConfig, $cityCode);
     }
 
     public function taxCodesFor(string $cityCode): TaxCodes
     {
-        return (new TaxCodes($cityCode))
-            ->useMasterKey($this->useMasterKey)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new TaxCodes($this->httpConfig, $cityCode);
     }
 }

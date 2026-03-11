@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Larafocus;
 
-use Larafocus\Infrastructure\Api;
+use Larafocus\Infrastructure\HttpConfig;
 use Larafocus\Search\Cities;
 
-class Search extends Api
+class Search
 {
+    public function __construct(private readonly HttpConfig $httpConfig) {}
+
     public function cities(): Cities
     {
-        return (new Cities)
-            ->useMasterKey($this->useMasterKey)
-            ->environment($this->environment)
-            ->timeout($this->timeout);
+        return new Cities($this->httpConfig);
     }
 }

@@ -14,73 +14,43 @@ covers(FocusManager::class, Focus::class);
 test('default values are correct', function () {
     $manager = app(FocusManager::class);
 
-    expect($manager->timeout)->toBe(60)
-        ->and($manager->environment)->toBeNull()
-        ->and($manager->useMasterKey)->toBeFalse()
-        ->and($manager->token)->toBeNull();
+    expect($manager->getTimeout())->toBe(60)
+        ->and($manager->getEnvironment())->toBeNull()
+        ->and($manager->getToken())->toBeNull()
+        ->and($manager->getMasterToken())->toBeNull();
 });
 
-test('timeout sets timeout and returns instance', function () {
-    $result = Focus::timeout(30);
+test('setup sets all values and returns instance', function () {
+    $result = Focus::setup(
+        timeout: 30,
+        environment: 'production',
+        token: 'my-token',
+        masterToken: 'master',
+    );
 
     expect($result)->toBeInstanceOf(FocusManager::class)
-        ->and($result->timeout)->toBe(30);
+        ->and($result->getTimeout())->toBe(30)
+        ->and($result->getEnvironment())->toBe('production')
+        ->and($result->getToken())->toBe('my-token')
+        ->and($result->getMasterToken())->toBe('master');
 });
 
-test('timeout uses default value', function () {
-    Focus::timeout(999);
-    Focus::timeout();
+test('setup resets all values to defaults', function () {
+    Focus::setup(
+        timeout: 30,
+        environment: 'production',
+        token: 'my-token',
+        masterToken: 'master',
+    );
 
-    expect(app(FocusManager::class)->timeout)->toBe(60);
-});
+    Focus::setup();
 
-test('environment sets environment and returns instance', function () {
-    $result = Focus::environment('production');
+    $manager = app(FocusManager::class);
 
-    expect($result)->toBeInstanceOf(FocusManager::class)
-        ->and($result->environment)->toBe('production');
-});
-
-test('environment defaults to null', function () {
-    Focus::environment('production');
-    Focus::environment();
-
-    expect(app(FocusManager::class)->environment)->toBeNull();
-});
-
-test('useMasterKey sets flag and returns instance', function () {
-    $result = Focus::useMasterKey();
-
-    expect($result)->toBeInstanceOf(FocusManager::class)
-        ->and($result->useMasterKey)->toBeTrue();
-});
-
-test('useMasterKey can be set to false', function () {
-    Focus::useMasterKey(true);
-    Focus::useMasterKey(false);
-
-    expect(app(FocusManager::class)->useMasterKey)->toBeFalse();
-});
-
-test('token sets token and returns instance', function () {
-    $result = Focus::token('my-token');
-
-    expect($result)->toBeInstanceOf(FocusManager::class)
-        ->and($result->token)->toBe('my-token');
-});
-
-test('getEnv returns instance environment when set', function () {
-    Focus::environment('production');
-
-    expect(Focus::getEnv())->toBe('production');
-});
-
-test('getEnv returns config environment when instance is null', function () {
-    expect(Focus::getEnv())->toBe('sandbox');
-});
-
-test('getEndpoint returns endpoint from config', function () {
-    expect(Focus::getEndpoint())->toBe('https://homologacao.focusnfe.com.br');
+    expect($manager->getTimeout())->toBe(60)
+        ->and($manager->getEnvironment())->toBeNull()
+        ->and($manager->getToken())->toBeNull()
+        ->and($manager->getMasterToken())->toBeNull();
 });
 
 test('nfse returns Nfse instance', function () {
@@ -104,10 +74,11 @@ test('companies returns Companies instance', function () {
 });
 
 test('factory methods pass configuration to instances', function () {
-    Focus::timeout(15);
-    Focus::environment('production');
-    Focus::useMasterKey(true);
-    Focus::token('custom-token');
+    Focus::setup(
+        timeout: 15,
+        environment: 'production',
+        token: 'custom-token',
+    );
 
     Http::fake();
 
