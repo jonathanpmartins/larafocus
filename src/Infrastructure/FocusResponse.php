@@ -29,7 +29,7 @@ readonly class FocusResponse
             statusCode: $response->status(),
             success: $response->successful(),
             body: $body,
-            errors: self::extractErrors($body),
+            errors: self::extractErrors($body, $response),
             response: $response,
         );
     }
@@ -38,7 +38,7 @@ readonly class FocusResponse
      * @param  array<string, mixed>  $body
      * @return list<array{codigo?: string, mensagem?: string, campo?: string}>
      */
-    private static function extractErrors(array $body): array
+    private static function extractErrors(array $body, Response $response): array
     {
         if (isset($body['erros']) && is_array($body['erros'])) {
             /** @var list<array{codigo?: string, mensagem?: string, campo?: string}> */
@@ -49,6 +49,51 @@ readonly class FocusResponse
             return [['codigo' => $body['codigo'], 'mensagem' => $body['mensagem']]];
         }
 
+        if ($body === [] && ! $response->successful()) {
+            return [self::buildNonJsonError($response)];
+        }
+
         return [];
+    }
+
+    /** @return array{codigo: string, mensagem: string} */
+    private static function buildNonJsonError(Response $response): array
+    {
+        $rawBody = trim($response->body());
+        $statusCode = (string) $response->status();
+        $statusPhrase = self::statusPhrase($response->status());
+
+        if ($rawBody === '') {
+            return ['codigo' => $statusCode, 'mensagem' => $statusPhrase];
+        }
+
+        $maxLength = 500;
+
+        $truncatedBody = mb_strlen($rawBody) > $maxLength
+            ? mb_substr($rawBody, 0, $maxLength).'…'
+            : $rawBody;
+
+        return ['codigo' => $statusCode, 'mensagem' => $statusPhrase.': '.$truncatedBody];
+    }
+
+    private static function statusPhrase(int $statusCode): string
+    {
+        /** @var array<int, string> $phrases */
+        $phrases = [
+            400 => 'Bad Request',
+            401 => 'Unauthorized',
+            403 => 'Forbidden',
+            404 => 'Not Found',
+            405 => 'Method Not Allowed',
+            408 => 'Request Timeout',
+            422 => 'Unprocessable Entity',
+            429 => 'Too Many Requests',
+            500 => 'Internal Server Error',
+            502 => 'Bad Gateway',
+            503 => 'Service Unavailable',
+            504 => 'Gateway Timeout',
+        ];
+
+        return $phrases[$statusCode] ?? 'HTTP Error';
     }
 }

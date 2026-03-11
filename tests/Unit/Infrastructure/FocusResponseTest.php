@@ -115,6 +115,99 @@ test('fromResponse filters non-array items from erros', function () {
     ]);
 });
 
+test('fromResponse synthesizes error for non-json 502 with html body', function () {
+    $htmlBody = '<html><body><h1>502 Bad Gateway</h1></body></html>';
+    $response = new Response(new Psr7Response(502, ['Content-Type' => 'text/html'], $htmlBody));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->body)->toBe([])
+        ->and($focusResponse->errors)->toHaveCount(1)
+        ->and($focusResponse->errors[0]['codigo'])->toBe('502')
+        ->and($focusResponse->errors[0]['mensagem'])->toBe('Bad Gateway: '.$htmlBody);
+});
+
+test('fromResponse synthesizes error for non-json 500 with empty body', function () {
+    $response = new Response(new Psr7Response(500, [], ''));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->errors)->toBe([
+        ['codigo' => '500', 'mensagem' => 'Internal Server Error'],
+    ]);
+});
+
+test('fromResponse does not truncate body at exactly 500 characters', function () {
+    $body = str_repeat('y', 500);
+    $response = new Response(new Psr7Response(502, [], $body));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->errors[0]['mensagem'])->toBe('Bad Gateway: '.$body);
+});
+
+test('fromResponse truncates body at 501 characters', function () {
+    $body = 'A'.str_repeat('x', 500);
+    $response = new Response(new Psr7Response(503, [], $body));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    $mensagem = $focusResponse->errors[0]['mensagem'];
+
+    expect($mensagem)->toStartWith('Service Unavailable: A')
+        ->and($mensagem)->toEndWith('…')
+        ->and($mensagem)->toBe('Service Unavailable: '.mb_substr($body, 0, 500).'…');
+});
+
+test('fromResponse treats whitespace-only body as empty', function () {
+    $response = new Response(new Psr7Response(500, [], "  \n\t  "));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->errors)->toBe([
+        ['codigo' => '500', 'mensagem' => 'Internal Server Error'],
+    ]);
+});
+
+test('fromResponse uses correct status phrase for known codes', function (int $status, string $phrase) {
+    $response = new Response(new Psr7Response($status, [], ''));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->errors[0])->toBe(['codigo' => (string) $status, 'mensagem' => $phrase]);
+})->with([
+    [400, 'Bad Request'],
+    [401, 'Unauthorized'],
+    [403, 'Forbidden'],
+    [404, 'Not Found'],
+    [405, 'Method Not Allowed'],
+    [408, 'Request Timeout'],
+    [422, 'Unprocessable Entity'],
+    [429, 'Too Many Requests'],
+    [500, 'Internal Server Error'],
+    [502, 'Bad Gateway'],
+    [503, 'Service Unavailable'],
+    [504, 'Gateway Timeout'],
+]);
+
+test('fromResponse uses HTTP Error for unknown status codes', function () {
+    $response = new Response(new Psr7Response(418, [], ''));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->errors)->toBe([
+        ['codigo' => '418', 'mensagem' => 'HTTP Error'],
+    ]);
+});
+
+test('fromResponse does not synthesize error for successful non-json response', function () {
+    $response = new Response(new Psr7Response(200, ['Content-Type' => 'text/html'], '<html></html>'));
+
+    $focusResponse = FocusResponse::fromResponse($response);
+
+    expect($focusResponse->errors)->toBe([]);
+});
+
 test('fromResponse prefers erros array over top-level codigo and mensagem', function () {
     $errors = [['codigo' => 'detalhe', 'mensagem' => 'Erro detalhado']];
 
