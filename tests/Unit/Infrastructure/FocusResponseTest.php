@@ -41,13 +41,13 @@ test('fromResponse marks 5xx as not success', function () {
 test('fromResponse decodes json body', function () {
     $focusResponse = FocusResponse::fromResponse(makeResponse(200, ['key' => 'value']));
 
-    expect($focusResponse->body)->toBe(['key' => 'value']);
+    expect($focusResponse->data)->toBe(['key' => 'value']);
 });
 
 test('fromResponse handles null json as empty array', function () {
     $focusResponse = FocusResponse::fromResponse(makeResponse(200));
 
-    expect($focusResponse->body)->toBe([]);
+    expect($focusResponse->data)->toBe([]);
 });
 
 test('fromResponse extracts erros array', function () {
@@ -121,7 +121,7 @@ test('fromResponse synthesizes error for non-json 502 with html body', function 
 
     $focusResponse = FocusResponse::fromResponse($response);
 
-    expect($focusResponse->body)->toBe([])
+    expect($focusResponse->data)->toBe([])
         ->and($focusResponse->errors)->toHaveCount(1)
         ->and($focusResponse->errors[0]['codigo'])->toBe('502')
         ->and($focusResponse->errors[0]['mensagem'])->toBe('Bad Gateway: '.$htmlBody);

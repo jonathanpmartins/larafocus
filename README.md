@@ -66,7 +66,7 @@ Every method returns a `FocusResponse` with:
 ```php
 $response->statusCode; // int — HTTP status code
 $response->success;    // bool — true if status < 400
-$response->body;       // array — parsed JSON response
+$response->data;       // array — parsed JSON response
 $response->errors;     // array — extracted errors (if any)
 $response->response;   // Illuminate\Http\Client\Response — raw response
 ```
@@ -234,10 +234,10 @@ The FocusNFe API returns relative paths for file downloads (XML, cancellation XM
 use Larafocus\Focus;
 
 // Build download URL from a relative path
-$xmlUrl = Focus::resolveFileUrl($response->body['caminho_xml_nota_fiscal']);
+$xmlUrl = Focus::resolveFileUrl($data['caminho_xml_nota_fiscal']);
 // => "https://homologacao.focusnfe.com.br/v2/nfse/abc123.xml"
 
-$cancelXmlUrl = Focus::resolveFileUrl($response->body['caminho_xml_cancelamento']);
+$cancelXmlUrl = Focus::resolveFileUrl($data['caminho_xml_cancelamento']);
 // => "https://homologacao.focusnfe.com.br/v2/nfse/abc123-cancelamento.xml"
 ```
 

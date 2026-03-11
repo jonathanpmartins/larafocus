@@ -9,47 +9,47 @@ use Illuminate\Http\Client\Response;
 readonly class FocusResponse
 {
     /**
-     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $data
      * @param  list<array{codigo?: string, mensagem?: string, campo?: string}>  $errors
      */
     public function __construct(
         public int $statusCode,
         public bool $success,
-        public array $body,
+        public array $data,
         public array $errors,
         public Response $response,
     ) {}
 
     public static function fromResponse(Response $response): self
     {
-        /** @var array<string, mixed> $body */
-        $body = $response->json() ?? [];
+        /** @var array<string, mixed> $data */
+        $data = $response->json() ?? [];
 
         return new self(
             statusCode: $response->status(),
             success: $response->successful(),
-            body: $body,
-            errors: self::extractErrors($body, $response),
+            data: $data,
+            errors: self::extractErrors($data, $response),
             response: $response,
         );
     }
 
     /**
-     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $data
      * @return list<array{codigo?: string, mensagem?: string, campo?: string}>
      */
-    private static function extractErrors(array $body, Response $response): array
+    private static function extractErrors(array $data, Response $response): array
     {
-        if (isset($body['erros']) && is_array($body['erros'])) {
+        if (isset($data['erros']) && is_array($data['erros'])) {
             /** @var list<array{codigo?: string, mensagem?: string, campo?: string}> */
-            return array_values(array_filter($body['erros'], is_array(...)));
+            return array_values(array_filter($data['erros'], is_array(...)));
         }
 
-        if (isset($body['codigo'], $body['mensagem']) && is_string($body['codigo']) && is_string($body['mensagem'])) {
-            return [['codigo' => $body['codigo'], 'mensagem' => $body['mensagem']]];
+        if (isset($data['codigo'], $data['mensagem']) && is_string($data['codigo']) && is_string($data['mensagem'])) {
+            return [['codigo' => $data['codigo'], 'mensagem' => $data['mensagem']]];
         }
 
-        if ($body === [] && ! $response->successful()) {
+        if ($data === [] && ! $response->successful()) {
             return [self::buildNonJsonError($response)];
         }
 
