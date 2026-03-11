@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http as HttpClient;
 readonly class Http
 {
     public function __construct(
-        private Environment $environment,
+        private string $baseUrl,
         private string $token,
         private int $timeout = 60,
         private ContentType $contentType = ContentType::Json,
@@ -44,10 +44,9 @@ readonly class Http
     private function buildClient(): PendingRequest
     {
         $encodedToken = base64_encode($this->token);
-        $endpoint = config()->string('larafocus.'.$this->environment->value.'.endpoint').config()->string('larafocus.prefix');
 
         $pendingRequest = HttpClient::withToken($encodedToken, 'Basic')
-            ->baseUrl($endpoint)
+            ->baseUrl($this->baseUrl)
             ->timeout($this->timeout);
 
         return $this->contentType->applyTo($pendingRequest);

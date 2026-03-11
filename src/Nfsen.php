@@ -5,29 +5,26 @@ declare(strict_types=1);
 namespace Larafocus;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\HasHttp;
-use Larafocus\Infrastructure\HttpConfig;
+use Larafocus\Infrastructure\Http;
 
-class Nfsen
+readonly class Nfsen
 {
-    use HasHttp;
-
-    public function __construct(private readonly HttpConfig $httpConfig) {}
+    public function __construct(private Http $http) {}
 
     /** @param array<string, mixed> $parameters */
     public function create(string $reference, array $parameters = []): Response
     {
-        return $this->http()->post('/nfsen?ref='.urlencode($reference), $parameters);
+        return $this->http->post('/nfsen?ref='.urlencode($reference), $parameters);
     }
 
     public function get(string $reference): Response
     {
-        return $this->http()->get('/nfsen/'.urlencode($reference));
+        return $this->http->get('/nfsen/'.urlencode($reference));
     }
 
     /** @param array<string, mixed> $parameters */
     public function cancel(string $reference, array $parameters = []): Response
     {
-        return $this->http()->delete('/nfsen/'.urlencode($reference), $parameters);
+        return $this->http->delete('/nfsen/'.urlencode($reference), $parameters);
     }
 }

@@ -5,26 +5,23 @@ declare(strict_types=1);
 namespace Larafocus\Search\Cities;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\HasHttp;
-use Larafocus\Infrastructure\HttpConfig;
+use Larafocus\Infrastructure\Http;
 
-class TaxCodes
+readonly class TaxCodes
 {
-    use HasHttp;
-
     public function __construct(
-        private readonly HttpConfig $httpConfig,
-        private readonly string $cityCode,
+        private Http $http,
+        private string $cityCode,
     ) {}
 
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
-        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/codigos_tributarios_municipio', $parameters);
+        return $this->http->get('/municipios/'.urlencode($this->cityCode).'/codigos_tributarios_municipio', $parameters);
     }
 
     public function get(string $taxCode): Response
     {
-        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/codigos_tributarios_municipio/'.urlencode($taxCode));
+        return $this->http->get('/municipios/'.urlencode($this->cityCode).'/codigos_tributarios_municipio/'.urlencode($taxCode));
     }
 }

@@ -5,26 +5,23 @@ declare(strict_types=1);
 namespace Larafocus\Search\Cities;
 
 use Illuminate\Http\Client\Response;
-use Larafocus\Infrastructure\HasHttp;
-use Larafocus\Infrastructure\HttpConfig;
+use Larafocus\Infrastructure\Http;
 
-class Services
+readonly class Services
 {
-    use HasHttp;
-
     public function __construct(
-        private readonly HttpConfig $httpConfig,
-        private readonly string $cityCode,
+        private Http $http,
+        private string $cityCode,
     ) {}
 
     /** @param array<string, mixed> $parameters */
     public function list(array $parameters = []): Response
     {
-        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico', $parameters);
+        return $this->http->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico', $parameters);
     }
 
     public function get(string $serviceCode): Response
     {
-        return $this->http()->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico/'.urlencode($serviceCode));
+        return $this->http->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico/'.urlencode($serviceCode));
     }
 }

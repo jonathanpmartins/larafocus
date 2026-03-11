@@ -3,14 +3,13 @@
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Larafocus\Infrastructure\ContentType;
-use Larafocus\Infrastructure\Environment;
 use Larafocus\Infrastructure\Http as LarafocusHttp;
 
 covers(LarafocusHttp::class);
 
 test('xml content type sets xml headers', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
         contentType: ContentType::Xml,
@@ -27,7 +26,7 @@ test('xml content type sets xml headers', function () {
 
 test('pdf content type sets pdf headers', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
         contentType: ContentType::Pdf,
@@ -44,7 +43,7 @@ test('pdf content type sets pdf headers', function () {
 
 test('default content type is json', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
     );
@@ -60,7 +59,7 @@ test('default content type is json', function () {
 
 test('post sends correct method and data', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
     );
@@ -76,7 +75,7 @@ test('post sends correct method and data', function () {
 
 test('patch sends correct method and data', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
     );
@@ -92,7 +91,7 @@ test('patch sends correct method and data', function () {
 
 test('delete sends correct method', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
     );
@@ -106,17 +105,14 @@ test('delete sends correct method', function () {
 });
 
 test('default timeout is 60 seconds', function () {
-    // Reflection is used here because the timeout property is private and its
-    // default value is not observable through Http::fake(). This verifies the
-    // safety-critical invariant that the default matches the API's expectation.
-    $http = new LarafocusHttp(Environment::Sandbox, 'test-token');
+    $http = new LarafocusHttp('https://example.com/v2', 'test-token');
 
     expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
 });
 
 test('get passes parameters as query string', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'test-token',
         timeout: 60,
     );
@@ -131,7 +127,7 @@ test('get passes parameters as query string', function () {
 
 test('token is encoded and sent as basic auth', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://example.com/v2',
         token: 'direct-token',
     );
 
@@ -144,116 +140,15 @@ test('token is encoded and sent as basic auth', function () {
     });
 });
 
-test('sandbox environment uses sandbox endpoint', function () {
+test('request url combines base url and uri path', function () {
     $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
-        token: 'test-token',
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'homologacao.focusnfe.com.br');
-    });
-});
-
-test('production environment uses production endpoint', function () {
-    $http = new LarafocusHttp(
-        environment: Environment::Production,
-        token: 'test-token',
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'api.focusnfe.com.br');
-    });
-});
-
-test('base url includes v2 prefix', function () {
-    $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
+        baseUrl: 'https://custom.example.com/v2',
         token: 'test',
     );
 
     $http->get('/nfse/ref');
 
     Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), '/v2/nfse/ref');
-    });
-});
-
-test('custom endpoint from config', function () {
-    $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom.example.com');
-
-    $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
-        token: 'test',
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'custom.example.com/v2/test');
-    });
-});
-
-test('xml uses correct endpoint from config', function () {
-    $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom-xml.example.com');
-
-    $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
-        token: 'test',
-        contentType: ContentType::Xml,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'custom-xml.example.com/v2/test');
-    });
-});
-
-test('pdf uses correct endpoint from config', function () {
-    $this->app['config']->set('larafocus.sandbox.endpoint', 'https://custom-pdf.example.com');
-
-    $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
-        token: 'test',
-        contentType: ContentType::Pdf,
-    );
-
-    $http->get('/test');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), 'custom-pdf.example.com/v2/test');
-    });
-});
-
-test('xml base url includes v2 prefix', function () {
-    $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
-        token: 'test',
-        contentType: ContentType::Xml,
-    );
-
-    $http->get('/nfse/ref');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), '/v2/nfse/ref');
-    });
-});
-
-test('pdf base url includes v2 prefix', function () {
-    $http = new LarafocusHttp(
-        environment: Environment::Sandbox,
-        token: 'test',
-        contentType: ContentType::Pdf,
-    );
-
-    $http->get('/nfse/ref');
-
-    Http::assertSent(function (Request $request) {
-        return str_contains($request->url(), '/v2/nfse/ref');
+        return str_contains($request->url(), 'custom.example.com/v2/nfse/ref');
     });
 });

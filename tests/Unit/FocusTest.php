@@ -12,54 +12,62 @@ use Larafocus\Search;
 
 covers(FocusManager::class, Focus::class);
 
-test('default values are correct', function () {
-    $manager = app(FocusManager::class);
+test('default values resolve from config', function () {
+    Http::fake();
 
-    expect($manager->getTimeout())->toBe(60)
-        ->and($manager->getEnvironment())->toBeNull()
-        ->and($manager->getToken())->toBeNull()
-        ->and($manager->getMasterToken())->toBeNull();
+    Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('test-token');
+
+        return str_contains($request->url(), 'homologacao.focusnfe.com.br/v2/nfse/ref-1')
+            && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
 });
 
-test('setup returns new immutable instance with configured values', function () {
-    $result = Focus::setup(
-        timeout: 30,
-        environment: Environment::Production,
-        token: 'my-token',
-        masterToken: 'master',
-    );
+test('setup returns new instance with configured values', function () {
+    Http::fake();
 
-    expect($result)->toBeInstanceOf(FocusManager::class)
-        ->and($result->getTimeout())->toBe(30)
-        ->and($result->getEnvironment())->toBe(Environment::Production)
-        ->and($result->getToken())->toBe('my-token')
-        ->and($result->getMasterToken())->toBe('master');
-});
-
-test('setup does not mutate the singleton', function () {
     Focus::setup(
         timeout: 30,
         environment: Environment::Production,
         token: 'my-token',
         masterToken: 'master',
+    )->nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        $expectedToken = base64_encode('my-token');
+
+        return str_contains($request->url(), 'api.focusnfe.com.br/v2/nfse/ref-1')
+            && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
+    });
+});
+
+test('setup does not mutate the singleton', function () {
+    Http::fake();
+
+    Focus::setup(
+        timeout: 30,
+        environment: Environment::Production,
+        token: 'custom-token',
+        masterToken: 'master',
     );
 
-    $manager = app(FocusManager::class);
+    Focus::nfse()->get('ref-1');
 
-    expect($manager->getTimeout())->toBe(60)
-        ->and($manager->getEnvironment())->toBeNull()
-        ->and($manager->getToken())->toBeNull()
-        ->and($manager->getMasterToken())->toBeNull();
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'homologacao.focusnfe.com.br');
+    });
 });
 
 test('setup without arguments returns instance with defaults', function () {
-    $result = Focus::setup();
+    Http::fake();
 
-    expect($result)->toBeInstanceOf(FocusManager::class)
-        ->and($result->getTimeout())->toBe(60)
-        ->and($result->getEnvironment())->toBeNull()
-        ->and($result->getToken())->toBeNull()
-        ->and($result->getMasterToken())->toBeNull();
+    Focus::setup()->nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'homologacao.focusnfe.com.br/v2/nfse/ref-1');
+    });
 });
 
 test('nfse returns Nfse instance', function () {
@@ -85,15 +93,14 @@ test('companies returns Companies instance', function () {
 test('factory methods pass configuration to instances', function () {
     Http::fake();
 
-    $response = Focus::setup(
+    Focus::setup(
         timeout: 15,
         environment: Environment::Production,
         token: 'custom-token',
     )->nfse()->get('ref-1');
 
     Http::assertSent(function ($request) {
-        return str_contains($request->url(), 'api.focusnfe.com.br')
-            && str_contains($request->url(), '/nfse/ref-1');
+        return str_contains($request->url(), 'api.focusnfe.com.br/v2/nfse/ref-1');
     });
 });
 
@@ -135,9 +142,52 @@ test('facade resolves to FocusManager', function () {
 test('nfsen factory passes configuration', function () {
     Http::fake();
 
-    $response = Focus::nfsen()->get('ref-1');
+    Focus::nfsen()->get('ref-1');
 
     Http::assertSent(function ($request) {
         return str_contains($request->url(), '/nfsen/ref-1');
+    });
+});
+
+test('companies always uses production endpoint with prefix', function () {
+    Http::fake();
+
+    Focus::setup(
+        environment: Environment::Sandbox,
+        token: 'some-token',
+        masterToken: 'master',
+    )->companies()->get('id');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'api.focusnfe.com.br/v2/empresas/id');
+    });
+});
+
+test('default timeout is 60 seconds', function () {
+    // Reflection is used here because the timeout is not observable through
+    // Http::fake(). This verifies the safety-critical invariant that requests
+    // have a sensible default timeout and do not hang indefinitely.
+    $nfse = Focus::nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
+});
+
+test('setup default timeout is 60 seconds', function () {
+    // Same reflection justification as above — verifies setup() preserves
+    // the default timeout when no explicit value is provided.
+    $nfse = Focus::setup()->nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'timeout'))->getValue($http))->toBe(60);
+});
+
+test('base url includes endpoint and prefix for configured environment', function () {
+    Http::fake();
+
+    Focus::nfse()->get('ref-1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'homologacao.focusnfe.com.br/v2/nfse/ref-1');
     });
 });

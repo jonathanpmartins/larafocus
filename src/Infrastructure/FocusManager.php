@@ -28,60 +28,55 @@ readonly class FocusManager
         return new self($timeout, $environment, $token, $masterToken);
     }
 
-    public function getTimeout(): int
-    {
-        return $this->timeout;
-    }
-
-    public function getEnvironment(): ?Environment
-    {
-        return $this->environment;
-    }
-
-    public function getToken(): ?string
-    {
-        return $this->token;
-    }
-
-    public function getMasterToken(): ?string
-    {
-        return $this->masterToken;
-    }
-
     public function nfse(): Nfse
     {
-        return new Nfse($this->buildConfig());
+        return new Nfse($this->buildHttp());
     }
 
     public function nfsen(): Nfsen
     {
-        return new Nfsen($this->buildConfig());
+        return new Nfsen($this->buildHttp());
     }
 
     public function hooks(): Hooks
     {
-        return new Hooks($this->buildConfig());
+        return new Hooks($this->buildHttp());
     }
 
     public function search(): Search
     {
-        return new Search($this->buildConfig());
+        return new Search($this->buildHttp());
     }
 
     public function companies(): Companies
     {
-        return new Companies($this->buildConfig());
+        $prefix = config()->string('larafocus.prefix');
+        $productionBaseUrl = config()->string('larafocus.production.endpoint').$prefix;
+
+        return new Companies(
+            new Http(
+                baseUrl: $productionBaseUrl,
+                token: $this->masterToken ?? config()->string('larafocus.master_token'),
+                timeout: $this->timeout,
+            ),
+            $this->resolveEnvironment(),
+        );
     }
 
-    private function buildConfig(): HttpConfig
+    private function buildHttp(): Http
     {
-        $environment = $this->environment ?? Environment::from(config()->string('larafocus.environment'));
+        $environment = $this->resolveEnvironment();
+        $prefix = config()->string('larafocus.prefix');
 
-        return new HttpConfig(
-            timeout: $this->timeout,
-            environment: $environment,
+        return new Http(
+            baseUrl: config()->string('larafocus.'.$environment->value.'.endpoint').$prefix,
             token: $this->token ?? config()->string('larafocus.'.$environment->value.'.token'),
-            masterToken: $this->masterToken ?? config()->string('larafocus.master_token'),
+            timeout: $this->timeout,
         );
+    }
+
+    private function resolveEnvironment(): Environment
+    {
+        return $this->environment ?? Environment::from(config()->string('larafocus.environment'));
     }
 }
