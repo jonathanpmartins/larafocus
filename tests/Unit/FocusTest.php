@@ -17,7 +17,7 @@ test('default values resolve from config', function () {
     Focus::nfse()->get('ref-1');
 
     Http::assertSent(function ($request) {
-        $expectedToken = base64_encode('test-token');
+        $expectedToken = base64_encode('test-token:');
 
         return str_contains($request->url(), 'homologacao.focusnfe.com.br/v2/nfse/ref-1')
             && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
@@ -35,7 +35,7 @@ test('setup returns new instance with configured values', function () {
     )->nfse()->get('ref-1');
 
     Http::assertSent(function ($request) {
-        $expectedToken = base64_encode('my-token');
+        $expectedToken = base64_encode('my-token:');
 
         return str_contains($request->url(), 'api.focusnfe.com.br/v2/nfse/ref-1')
             && $request->hasHeader('Authorization', 'Basic '.$expectedToken);
@@ -108,7 +108,7 @@ test('setup token is used instead of config token', function () {
     )->nfse()->get('ref-1');
 
     Http::assertSent(function ($request) {
-        $expectedToken = base64_encode('custom-token');
+        $expectedToken = base64_encode('custom-token:');
 
         return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });
@@ -124,7 +124,7 @@ test('setup masterToken is used instead of config masterToken', function () {
     )->companies()->get('id');
 
     Http::assertSent(function ($request) {
-        $expectedToken = base64_encode('custom-master');
+        $expectedToken = base64_encode('custom-master:');
 
         return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });

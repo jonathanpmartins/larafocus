@@ -150,7 +150,7 @@ test('token is encoded and sent as basic auth', function () {
     $http->get('/test');
 
     Http::assertSent(function (Request $request) {
-        $expectedToken = base64_encode('direct-token');
+        $expectedToken = base64_encode('direct-token:');
 
         return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });

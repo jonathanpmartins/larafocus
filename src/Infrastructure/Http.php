@@ -53,9 +53,7 @@ readonly class Http
 
     private function buildClient(): PendingRequest
     {
-        $encodedToken = base64_encode($this->token);
-
-        $pendingRequest = HttpClient::withToken($encodedToken, 'Basic')
+        $pendingRequest = HttpClient::withBasicAuth($this->token, '')
             ->baseUrl($this->baseUrl)
             ->timeout($this->timeout);
 
