@@ -73,6 +73,22 @@ test('post sends correct method and data', function () {
     });
 });
 
+test('put sends correct method and data', function () {
+    $http = new LarafocusHttp(
+        baseUrl: 'https://example.com/v2',
+        token: 'test-token',
+        timeout: 60,
+    );
+
+    $http->put('/empresas/123', ['name' => 'test']);
+
+    Http::assertSent(function (Request $request) {
+        return $request->method() === 'PUT'
+            && str_contains($request->url(), '/empresas/123')
+            && $request['name'] === 'test';
+    });
+});
+
 test('patch sends correct method and data', function () {
     $http = new LarafocusHttp(
         baseUrl: 'https://example.com/v2',

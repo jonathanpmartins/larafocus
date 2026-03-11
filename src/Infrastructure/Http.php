@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Larafocus\Infrastructure;
 
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http as HttpClient;
 use InvalidArgumentException;
 
@@ -23,27 +22,33 @@ readonly class Http
     }
 
     /** @param array<string, mixed> $parameters */
-    public function get(string $uri, array $parameters = []): Response
+    public function get(string $uri, array $parameters = []): FocusResponse
     {
-        return $this->buildClient()->get($uri, $parameters);
+        return FocusResponse::fromResponse($this->buildClient()->get($uri, $parameters));
     }
 
     /** @param array<string, mixed> $parameters */
-    public function post(string $uri, array $parameters = []): Response
+    public function post(string $uri, array $parameters = []): FocusResponse
     {
-        return $this->buildClient()->post($uri, $parameters);
+        return FocusResponse::fromResponse($this->buildClient()->post($uri, $parameters));
     }
 
     /** @param array<string, mixed> $parameters */
-    public function patch(string $uri, array $parameters = []): Response
+    public function put(string $uri, array $parameters = []): FocusResponse
     {
-        return $this->buildClient()->patch($uri, $parameters);
+        return FocusResponse::fromResponse($this->buildClient()->put($uri, $parameters));
     }
 
     /** @param array<string, mixed> $parameters */
-    public function delete(string $uri, array $parameters = []): Response
+    public function patch(string $uri, array $parameters = []): FocusResponse
     {
-        return $this->buildClient()->delete($uri, $parameters);
+        return FocusResponse::fromResponse($this->buildClient()->patch($uri, $parameters));
+    }
+
+    /** @param array<string, mixed> $parameters */
+    public function delete(string $uri, array $parameters = []): FocusResponse
+    {
+        return FocusResponse::fromResponse($this->buildClient()->delete($uri, $parameters));
     }
 
     private function buildClient(): PendingRequest

@@ -22,3 +22,9 @@ test('cancel method', function () {
 
     $this->assertRequest('DELETE', '/nfsen/unique-reference', $response);
 });
+
+test('hook method', function () {
+    $response = Focus::nfsen()->hook('unique-reference');
+
+    $this->assertRequest('POST', '/nfsen/unique-reference/hook', $response);
+});

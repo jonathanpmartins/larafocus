@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Larafocus\Search\Cities;
 
-use Illuminate\Http\Client\Response;
+use Larafocus\Infrastructure\FocusResponse;
 use Larafocus\Infrastructure\Http;
 
 readonly class Services
@@ -15,12 +15,12 @@ readonly class Services
     ) {}
 
     /** @param array<string, mixed> $parameters */
-    public function list(array $parameters = []): Response
+    public function list(array $parameters = []): FocusResponse
     {
         return $this->http->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico', $parameters);
     }
 
-    public function get(string $serviceCode): Response
+    public function get(string $serviceCode): FocusResponse
     {
         return $this->http->get('/municipios/'.urlencode($this->cityCode).'/itens_lista_servico/'.urlencode($serviceCode));
     }

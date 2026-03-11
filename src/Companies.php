@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Larafocus;
 
-use Illuminate\Http\Client\Response;
 use Larafocus\Infrastructure\Environment;
+use Larafocus\Infrastructure\FocusResponse;
 use Larafocus\Infrastructure\Http;
 
 readonly class Companies
@@ -15,33 +15,33 @@ readonly class Companies
         private Environment $environment,
     ) {}
 
-    public function list(int $offset = 0): Response
+    public function list(int $offset = 0): FocusResponse
     {
         return $this->http->get('/empresas', ['offset' => $offset]);
     }
 
     /** @param array<string, mixed> $parameters */
-    public function create(array $parameters = []): Response
+    public function create(array $parameters = []): FocusResponse
     {
         $dryRun = $this->environment === Environment::Sandbox ? '?dry_run=1' : '';
 
         return $this->http->post('/empresas'.$dryRun, $parameters);
     }
 
-    public function get(string $id): Response
+    public function get(string $id): FocusResponse
     {
         return $this->http->get('/empresas/'.urlencode($id));
     }
 
     /** @param array<string, mixed> $parameters */
-    public function update(string $id, array $parameters = []): Response
+    public function update(string $id, array $parameters = []): FocusResponse
     {
         $url = '/empresas/'.urlencode($id).($this->environment === Environment::Sandbox ? '?dry_run=1' : '');
 
-        return $this->http->patch($url, $parameters);
+        return $this->http->put($url, $parameters);
     }
 
-    public function delete(string $id): Response
+    public function delete(string $id): FocusResponse
     {
         return $this->http->delete('/empresas/'.urlencode($id));
     }

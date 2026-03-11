@@ -44,13 +44,13 @@ test('update method', function () {
         ->companies()
         ->update('company-id');
 
-    $this->assertRequest('PATCH', '/empresas/company-id', $response);
+    $this->assertRequest('PUT', '/empresas/company-id', $response);
 
     $response = Focus::setup(environment: Environment::Sandbox)
         ->companies()
         ->update('company-id');
 
-    $this->assertRequest('PATCH', '/empresas/company-id?dry_run=1', $response);
+    $this->assertRequest('PUT', '/empresas/company-id?dry_run=1', $response);
 });
 
 test('delete method', function () {

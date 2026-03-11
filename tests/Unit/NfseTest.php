@@ -28,3 +28,9 @@ test('email method', function () {
 
     $this->assertRequest('POST', '/nfse/unique-reference/email', $response);
 });
+
+test('hook method', function () {
+    $response = Focus::nfse()->hook('unique-reference');
+
+    $this->assertRequest('POST', '/nfse/unique-reference/hook', $response);
+});

@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 use Illuminate\Http\Client\Request;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Larafocus\Infrastructure\FocusManager;
+use Larafocus\Infrastructure\FocusResponse;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
@@ -37,7 +37,7 @@ class UnitTestCase extends BaseTestCase
         return config()->string('larafocus.prefix').$path;
     }
 
-    public function assertRequest(string $method, string $path, Response $response): void
+    public function assertRequest(string $method, string $path, FocusResponse $focusResponse): void
     {
         Http::assertSent(function (Request $request) use ($method, $path) {
             return $request->method() === $method && str_contains($request->url(), $path);
@@ -48,13 +48,13 @@ class UnitTestCase extends BaseTestCase
 
             $this->assertSame(
                 $query,
-                $response->effectiveUri()->getQuery()
+                $focusResponse->response->effectiveUri()->getQuery()
             );
         }
 
         $this->assertSame(
             $this->makePath($path),
-            $response->effectiveUri()->getPath()
+            $focusResponse->response->effectiveUri()->getPath()
         );
     }
 }
