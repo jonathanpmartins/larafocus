@@ -88,6 +88,13 @@ class FocusManager
         );
     }
 
+    public function resolveFileUrl(string $relativePath): string
+    {
+        $environment = $this->resolveEnvironment();
+
+        return config()->string('larafocus.'.$environment->value.'.endpoint').$relativePath;
+    }
+
     private function buildHttp(): Http
     {
         $environment = $this->resolveEnvironment();

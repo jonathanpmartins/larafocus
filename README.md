@@ -226,6 +226,23 @@ Focus::search()->cities()->taxCodesFor('3550308')->list();
 Focus::search()->cities()->taxCodesFor('3550308')->get('code-123');
 ```
 
+### File URLs
+
+The FocusNFe API returns relative paths for file downloads (XML, cancellation XML). Use `resolveFileUrl` to build the full URL:
+
+```php
+use Larafocus\Focus;
+
+// Build download URL from a relative path
+$xmlUrl = Focus::resolveFileUrl($response->body['caminho_xml_nota_fiscal']);
+// => "https://homologacao.focusnfe.com.br/v2/nfse/abc123.xml"
+
+$cancelXmlUrl = Focus::resolveFileUrl($response->body['caminho_xml_cancelamento']);
+// => "https://homologacao.focusnfe.com.br/v2/nfse/abc123-cancelamento.xml"
+```
+
+The URL respects the current environment (sandbox or production).
+
 ### Switching Environments
 
 ```php

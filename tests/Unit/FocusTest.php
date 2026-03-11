@@ -325,3 +325,30 @@ test('using resets token to null to fall back to config default', function () {
         return $request->hasHeader('Authorization', 'Basic '.$expectedToken);
     });
 });
+
+test('resolveFileUrl returns full url for sandbox environment', function () {
+    expect(Focus::resolveFileUrl('/v2/nfse/abc123.xml'))
+        ->toBe('https://homologacao.focusnfe.com.br/v2/nfse/abc123.xml');
+});
+
+test('resolveFileUrl returns full url for production environment', function () {
+    Focus::config(environment: Environment::Production, token: 'test-token');
+
+    expect(Focus::resolveFileUrl('/v2/nfse/abc123.xml'))
+        ->toBe('https://api.focusnfe.com.br/v2/nfse/abc123.xml');
+});
+
+test('resolveFileUrl respects environment set via using', function () {
+    $manager = Focus::using(environment: Environment::Production, token: 'test-token');
+
+    expect($manager->resolveFileUrl('/v2/nfse/abc123.xml'))
+        ->toBe('https://api.focusnfe.com.br/v2/nfse/abc123.xml');
+});
+
+test('resolveFileUrl via using does not mutate the singleton', function () {
+    Focus::using(environment: Environment::Production, token: 'test-token')
+        ->resolveFileUrl('/v2/nfse/abc123.xml');
+
+    expect(Focus::resolveFileUrl('/v2/nfse/abc123.xml'))
+        ->toBe('https://homologacao.focusnfe.com.br/v2/nfse/abc123.xml');
+});
