@@ -7,7 +7,6 @@ namespace Larafocus\Infrastructure;
 use Larafocus\Companies;
 use Larafocus\Hooks;
 use Larafocus\Nfse;
-use Larafocus\Nfsen;
 use Larafocus\Search;
 
 readonly class FocusManager
@@ -31,11 +30,6 @@ readonly class FocusManager
     public function nfse(): Nfse
     {
         return new Nfse($this->buildHttp());
-    }
-
-    public function nfsen(): Nfsen
-    {
-        return new Nfsen($this->buildHttp());
     }
 
     public function hooks(): Hooks

@@ -7,7 +7,6 @@ use Larafocus\Hooks;
 use Larafocus\Infrastructure\Environment;
 use Larafocus\Infrastructure\FocusManager;
 use Larafocus\Nfse;
-use Larafocus\Nfsen;
 use Larafocus\Search;
 
 covers(FocusManager::class, Focus::class);
@@ -74,10 +73,6 @@ test('nfse returns Nfse instance', function () {
     expect(Focus::nfse())->toBeInstanceOf(Nfse::class);
 });
 
-test('nfsen returns Nfsen instance', function () {
-    expect(Focus::nfsen())->toBeInstanceOf(Nfsen::class);
-});
-
 test('hooks returns Hooks instance', function () {
     expect(Focus::hooks())->toBeInstanceOf(Hooks::class);
 });
@@ -137,16 +132,6 @@ test('setup masterToken is used instead of config masterToken', function () {
 
 test('facade resolves to FocusManager', function () {
     expect(Focus::getFacadeRoot())->toBeInstanceOf(FocusManager::class);
-});
-
-test('nfsen factory passes configuration', function () {
-    Http::fake();
-
-    Focus::nfsen()->get('ref-1');
-
-    Http::assertSent(function ($request) {
-        return str_contains($request->url(), '/nfsen/ref-1');
-    });
 });
 
 test('companies always uses production endpoint with prefix', function () {
