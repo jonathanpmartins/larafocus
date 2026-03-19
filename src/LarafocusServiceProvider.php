@@ -16,7 +16,7 @@ class LarafocusServiceProvider extends ServiceProvider
         ]);
 
         Http::macro('focus', function (
-            string $environment = null,
+            ?string $environment = null,
             bool $useMasterKey = false,
             ?string $token = null,
         )
@@ -42,7 +42,7 @@ class LarafocusServiceProvider extends ServiceProvider
                 ->baseUrl($endpoint);
         });
 
-        Http::macro('focusXml', function (string $environment = null, ?string $token = null)
+        Http::macro('focusXml', function (?string $environment = null, ?string $token = null)
         {
             $environment = $environment ?: config('larafocus.environment');
             $token = base64_encode($token ?: config('larafocus.'.$environment.'.token'));
@@ -54,7 +54,7 @@ class LarafocusServiceProvider extends ServiceProvider
                 ->baseUrl($endpoint);
         });
 
-        Http::macro('focusPdf', function (string $environment = null, ?string $token = null)
+        Http::macro('focusPdf', function (?string $environment = null, ?string $token = null)
         {
             $environment = $environment ?: config('larafocus.environment');
             $token = base64_encode($token ?: config('larafocus.'.$environment.'.token'));
