@@ -7,6 +7,7 @@ namespace Larafocus\Nfse\DTO;
 use Larafocus\Nfse\DTO\Concerns\ValidatesConstraints;
 use Larafocus\Nfse\DTO\Enums\NaturezaOperacao;
 use Larafocus\Nfse\DTO\Enums\RegimeEspecialTributacao;
+use Larafocus\Shared\TypeCast;
 
 /**
  * @phpstan-import-type PrestadorArray from Prestador
@@ -14,7 +15,7 @@ use Larafocus\Nfse\DTO\Enums\RegimeEspecialTributacao;
  * @phpstan-import-type ServicoArray from Servico
  * @phpstan-import-type IntermediarioArray from Intermediario
  *
- * @phpstan-type NfseRequestArray array{data_emissao: string, natureza_operacao: string, optante_simples_nacional: bool, prestador: PrestadorArray, tomador: TomadorArray, servico: ServicoArray, regime_especial_tributacao?: string|null, incentivador_cultural?: bool|null, intermediario?: IntermediarioArray|null, codigo_obra?: string|null, art?: string|null, numero_nfse_substituido?: string|null, numero_rps_substituido?: string|null, serie_rps_substituido?: string|null, tipo_rps_substituido?: string|null}
+ * @phpstan-type NfseRequestArray array{data_emissao: string, natureza_operacao: string, optante_simples_nacional: string|int|bool, prestador: PrestadorArray, tomador: TomadorArray, servico: ServicoArray, regime_especial_tributacao?: string|null, incentivador_cultural?: string|int|bool|null, intermediario?: IntermediarioArray|null, codigo_obra?: string|null, art?: string|null, numero_nfse_substituido?: string|null, numero_rps_substituido?: string|null, serie_rps_substituido?: string|null, tipo_rps_substituido?: string|null}
  */
 readonly class NfseRequest
 {
@@ -48,14 +49,14 @@ readonly class NfseRequest
         return new self(
             data_emissao: $data['data_emissao'],
             natureza_operacao: NaturezaOperacao::from($data['natureza_operacao']),
-            optante_simples_nacional: $data['optante_simples_nacional'],
+            optante_simples_nacional: TypeCast::toBool($data['optante_simples_nacional']),
             prestador: Prestador::fromArray($data['prestador']),
             tomador: Tomador::fromArray($data['tomador']),
             servico: Servico::fromArray($data['servico']),
             regime_especial_tributacao: isset($data['regime_especial_tributacao'])
                 ? RegimeEspecialTributacao::from($data['regime_especial_tributacao'])
                 : null,
-            incentivador_cultural: $data['incentivador_cultural'] ?? null,
+            incentivador_cultural: TypeCast::nullableBool($data['incentivador_cultural'] ?? null),
             intermediario: isset($data['intermediario'])
                 ? Intermediario::fromArray($data['intermediario'])
                 : null,

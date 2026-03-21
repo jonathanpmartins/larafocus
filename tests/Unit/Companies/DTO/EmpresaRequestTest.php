@@ -127,6 +127,38 @@ test('fromArray handles missing optional fields', function () {
         ->and($request->habilita_nfe)->toBeNull();
 });
 
+test('fromArray casts string values for bool fields', function () {
+    $request = EmpresaRequest::fromArray([
+        'habilita_nfe' => '1',
+        'enviar_email_destinatario' => '0',
+        'delete_logo' => '1',
+        'smtp_ssl' => '0',
+        'nfe_sincrono' => '1',
+    ]);
+
+    expect($request->habilita_nfe)->toBeTrue()
+        ->and($request->enviar_email_destinatario)->toBeFalse()
+        ->and($request->delete_logo)->toBeTrue()
+        ->and($request->smtp_ssl)->toBeFalse()
+        ->and($request->nfe_sincrono)->toBeTrue();
+});
+
+test('fromArray casts string values for int fields', function () {
+    $request = EmpresaRequest::fromArray([
+        'inscricao_estadual' => '123456',
+        'numero' => '100',
+        'cep' => '12345678',
+        'smtp_porta' => '587',
+        'id_token_nfce_producao' => '1',
+    ]);
+
+    expect($request->inscricao_estadual)->toBe(123456)
+        ->and($request->numero)->toBe(100)
+        ->and($request->cep)->toBe(12345678)
+        ->and($request->smtp_porta)->toBe(587)
+        ->and($request->id_token_nfce_producao)->toBe(1);
+});
+
 test('round trip fromArray toArray preserves data for all fields', function () {
     $data = [
         // Dados basicos

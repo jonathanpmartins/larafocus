@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Larafocus\Nfse\DTO;
 
 use Larafocus\Nfse\DTO\Concerns\ValidatesConstraints;
+use Larafocus\Shared\TypeCast;
 
-/** @phpstan-type ServicoArray array{valor_servicos: float, iss_retido: bool, item_lista_servico: string, discriminacao: string, codigo_municipio: string, aliquota?: float|null, valor_deducoes?: float|null, valor_pis?: float|null, valor_cofins?: float|null, valor_inss?: float|null, valor_ir?: float|null, valor_csll?: float|null, valor_iss?: float|null, valor_iss_retido?: float|null, outras_retencoes?: float|null, base_calculo?: float|null, desconto_incondicionado?: float|null, desconto_condicionado?: float|null, codigo_cnae?: string|null, codigo_tributario_municipio?: string|null, codigo_nbs?: string|null, codigo_indicador_operacao?: string|null, ibs_cbs_classificacao_tributaria?: string|null, ibs_cbs_situacao_tributaria?: string|null, ibs_cbs_base_calculo?: float|null, ibs_uf_aliquota?: float|null, ibs_mun_aliquota?: float|null, cbs_aliquota?: float|null, ibs_uf_valor?: float|null, ibs_mun_valor?: float|null, cbs_valor?: float|null, percentual_total_tributos?: float|null, fonte_total_tributos?: string|null} */
+/** @phpstan-type ServicoArray array{valor_servicos: float, iss_retido: string|int|bool, item_lista_servico: string, discriminacao: string, codigo_municipio: string, aliquota?: float|null, valor_deducoes?: float|null, valor_pis?: float|null, valor_cofins?: float|null, valor_inss?: float|null, valor_ir?: float|null, valor_csll?: float|null, valor_iss?: float|null, valor_iss_retido?: float|null, outras_retencoes?: float|null, base_calculo?: float|null, desconto_incondicionado?: float|null, desconto_condicionado?: float|null, codigo_cnae?: string|null, codigo_tributario_municipio?: string|null, codigo_nbs?: string|null, codigo_indicador_operacao?: string|null, ibs_cbs_classificacao_tributaria?: string|null, ibs_cbs_situacao_tributaria?: string|null, ibs_cbs_base_calculo?: float|null, ibs_uf_aliquota?: float|null, ibs_mun_aliquota?: float|null, cbs_aliquota?: float|null, ibs_uf_valor?: float|null, ibs_mun_valor?: float|null, cbs_valor?: float|null, percentual_total_tributos?: float|null, fonte_total_tributos?: string|null} */
 readonly class Servico
 {
     use ValidatesConstraints;
@@ -54,7 +55,7 @@ readonly class Servico
     {
         return new self(
             valor_servicos: $data['valor_servicos'],
-            iss_retido: $data['iss_retido'],
+            iss_retido: TypeCast::toBool($data['iss_retido']),
             item_lista_servico: $data['item_lista_servico'],
             discriminacao: $data['discriminacao'],
             codigo_municipio: $data['codigo_municipio'],

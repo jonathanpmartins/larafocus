@@ -203,6 +203,27 @@ test('validates codigo_obra max 15 characters', function () {
     );
 })->throws(InvalidDtoException::class);
 
+test('fromArray casts string values for bool fields', function () {
+    $request = NfseRequest::fromArray([
+        'data_emissao' => '2024-01-15T10:30:00-03:00',
+        'natureza_operacao' => '1',
+        'optante_simples_nacional' => '1',
+        'prestador' => ['cnpj' => '12345678000195', 'inscricao_municipal' => '12345'],
+        'tomador' => ['cnpj' => '98765432000187'],
+        'servico' => [
+            'valor_servicos' => 1500.00,
+            'iss_retido' => false,
+            'item_lista_servico' => '1.07',
+            'discriminacao' => 'Desenvolvimento de software',
+            'codigo_municipio' => '3550308',
+        ],
+        'incentivador_cultural' => '0',
+    ]);
+
+    expect($request->optante_simples_nacional)->toBeTrue()
+        ->and($request->incentivador_cultural)->toBeFalse();
+});
+
 test('fromArray toArray round-trip preserves data', function () {
     // Keys ordered to match toArray() output order
     $data = [

@@ -233,6 +233,18 @@ test('fromArray maps all optional fields', function () {
         ->and($servico->fonte_total_tributos)->toBe('IBPT');
 });
 
+test('fromArray casts string iss_retido to bool', function () {
+    $s = Servico::fromArray([
+        'valor_servicos' => 1500.00,
+        'iss_retido' => '1',
+        'item_lista_servico' => '1.07',
+        'discriminacao' => 'Desenvolvimento de software',
+        'codigo_municipio' => '3550308',
+    ]);
+
+    expect($s->iss_retido)->toBeTrue();
+});
+
 test('fromArray handles missing optional fields', function () {
     $s = Servico::fromArray([
         'valor_servicos' => 500.00,
