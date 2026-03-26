@@ -88,6 +88,29 @@
         ],
         "test": [
             "@php vendor/bin/pest"
+        ],
+        "quality:test": "@php vendor/bin/pest --coverage --min=100 --parallel",
+        "quality:mutate": "@php vendor/bin/pest --mutate --min=100 --parallel",
+        "quality:types": "@php vendor/bin/pest --type-coverage --min=100",
+        "quality:rector": "@php vendor/bin/rector --dry-run",
+        "quality:phpstan": "@php vendor/bin/phpstan analyse",
+        "quality:psalm": "@php vendor/bin/psalm --taint-analysis",
+        "quality:pint": "@php vendor/bin/pint -p",
+        "quality": [
+            "@quality:test",
+            "@quality:mutate",
+            "@quality:types",
+            "@quality:rector",
+            "@quality:phpstan",
+            "@quality:psalm",
+            "@quality:pint",
+            "@quality:test",
+            "@quality:mutate",
+            "@quality:types",
+            "@quality:rector",
+            "@quality:phpstan",
+            "@quality:psalm",
+            "@quality:pint"
         ]
     }
 }
