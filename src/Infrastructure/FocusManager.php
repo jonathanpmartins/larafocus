@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Larafocus\Infrastructure;
 
+use InvalidArgumentException;
 use Larafocus\Companies;
 use Larafocus\Hooks;
 use Larafocus\Nfse;
@@ -91,15 +92,15 @@ class FocusManager
     public function resolveFileUrl(string $relativePath): string
     {
         if (! str_starts_with($relativePath, '/')) {
-            throw new \InvalidArgumentException('Relative path must start with /.');
+            throw new InvalidArgumentException('Relative path must start with /.');
         }
 
         if (str_contains($relativePath, '..')) {
-            throw new \InvalidArgumentException('Relative path must not contain path traversal sequences (..).');
+            throw new InvalidArgumentException('Relative path must not contain path traversal sequences (..).');
         }
 
         if (str_contains($relativePath, "\0")) {
-            throw new \InvalidArgumentException('Relative path must not contain null bytes.');
+            throw new InvalidArgumentException('Relative path must not contain null bytes.');
         }
 
         $environment = $this->resolveEnvironment();

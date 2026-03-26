@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Larafocus\Hooks\DTO;
 
 use Larafocus\Hooks\DTO\Enums\WebhookEvent;
+use Larafocus\Shared\InvalidDtoException;
 
 /** @phpstan-type WebhookRequestArray array{event: string, url: string, cnpj?: string|null, cpf?: string|null, authorization?: string|null, authorization_header?: string|null} */
 readonly class WebhookRequest
@@ -16,7 +17,17 @@ readonly class WebhookRequest
         public ?string $cpf = null,
         public ?string $authorization = null,
         public ?string $authorization_header = null,
-    ) {}
+    ) {
+        if (filter_var($this->url, FILTER_VALIDATE_URL) === false) {
+            throw new InvalidDtoException('url must be a valid URL.');
+        }
+
+        $scheme = parse_url($this->url, PHP_URL_SCHEME);
+
+        if (! in_array($scheme, ['https', 'http'], true)) {
+            throw new InvalidDtoException('url must use https or http scheme.');
+        }
+    }
 
     /** @phpstan-param WebhookRequestArray $data */
     public static function fromArray(array $data): self

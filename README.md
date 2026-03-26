@@ -122,6 +122,8 @@ $response = Focus::nfse()->email('ref-001', new NfseEmailRequest(
 $response = Focus::nfse()->hook('ref-001');
 ```
 
+Each email must be a valid email address (validated with `FILTER_VALIDATE_EMAIL`). The list accepts 1 to 10 addresses.
+
 Arrays are also accepted — they are converted to DTOs automatically:
 
 ```php
@@ -208,6 +210,8 @@ $response = Focus::hooks()->get('hook-id');
 $response = Focus::hooks()->delete('hook-id');
 ```
 
+The webhook `url` must be a valid URL using `https` or `http` scheme.
+
 ### Search
 
 ```php
@@ -240,6 +244,8 @@ $xmlUrl = Focus::resolveFileUrl($data['caminho_xml_nota_fiscal']);
 $cancelXmlUrl = Focus::resolveFileUrl($data['caminho_xml_cancelamento']);
 // => "https://homologacao.focusnfe.com.br/v2/nfse/abc123-cancelamento.xml"
 ```
+
+The `relativePath` must start with `/` and must not contain path traversal sequences (`..`) or null bytes.
 
 The URL respects the current environment (sandbox or production).
 

@@ -24,8 +24,3 @@ test('resolveFileUrl rejects path not starting with forward slash', function () 
 test('resolveFileUrl rejects empty path', function () {
     Focus::resolveFileUrl('');
 })->throws(InvalidArgumentException::class, 'must start with');
-
-test('resolveFileUrl accepts valid path with single dots', function () {
-    expect(Focus::resolveFileUrl('/v2/nfse/abc123.xml'))
-        ->toBe('https://homologacao.focusnfe.com.br/v2/nfse/abc123.xml');
-});

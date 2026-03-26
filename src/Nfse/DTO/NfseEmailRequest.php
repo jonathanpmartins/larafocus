@@ -18,6 +18,12 @@ readonly class NfseEmailRequest
         if ($count === 0 || $count > 10) {
             throw new InvalidDtoException('emails must contain between 1 and 10 addresses.');
         }
+
+        foreach ($this->emails as $email) {
+            if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+                throw new InvalidDtoException(sprintf('"%s" is not a valid email address.', $email));
+            }
+        }
     }
 
     /** @phpstan-param NfseEmailRequestArray $data */
