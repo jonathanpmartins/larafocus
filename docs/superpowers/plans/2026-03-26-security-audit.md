@@ -290,7 +290,7 @@ test('fromArray rejects invalid URL', function () {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `./vendor/bin/pest tests/Unit/Security/WebhookUrlSecurityTest.php`
-Expected: 5 tests FAIL, 3 tests PASS
+Expected: 6 tests FAIL, 2 tests PASS
 
 - [ ] **Step 3: Implement URL validation in WebhookRequest constructor**
 
@@ -390,7 +390,7 @@ test('fromArray rejects invalid email', function () {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `./vendor/bin/pest tests/Unit/Security/EmailValidationSecurityTest.php`
-Expected: 4 tests FAIL, 2 tests PASS
+Expected: 5 tests FAIL, 1 test PASSES
 
 - [ ] **Step 3: Implement email format validation**
 
@@ -559,7 +559,49 @@ git commit -m "add .env.example with placeholder values for safe onboarding"
 
 ---
 
-### Task 7: Run full quality suite
+### Task 7: Update README.md with validation constraints
+
+**Files:**
+- Modify: `README.md`
+
+These are breaking behavioral changes — inputs that were silently accepted now throw `InvalidDtoException` or `InvalidArgumentException`. The README must document the new constraints.
+
+- [ ] **Step 1: Add validation notes to relevant README sections**
+
+In the **File URLs** section (after the `resolveFileUrl` example), add:
+
+```markdown
+The `relativePath` must start with `/` and must not contain path traversal sequences (`..`) or null bytes.
+```
+
+In the **Webhooks** section (after the `WebhookRequest` example), add:
+
+```markdown
+The webhook `url` must be a valid URL using `https` or `http` scheme.
+```
+
+In the **NFSe** section, after the `NfseEmailRequest` usage example, add:
+
+```markdown
+Each email must be a valid email address (validated with `FILTER_VALIDATE_EMAIL`). The list accepts 1 to 10 addresses.
+```
+
+In the **Companies** section, after the `EmpresaRequest` usage example, add:
+
+```markdown
+The `arquivo_certificado_base64` field is limited to ~10MB (14,000,000 characters). The `arquivo_logo_base64` field is limited to ~2MB (2,800,000 characters).
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add README.md
+git commit -m "docs: document new input validation constraints in README"
+```
+
+---
+
+### Task 8: Run full quality suite
 
 - [ ] **Step 1: Run complete test suite with coverage**
 
