@@ -32,7 +32,60 @@ Type coverage must remain at 100%. Any new or changed code must include complete
 
 ## Project
 
-Larafocus is a Laravel package that integrates with the FocusNFe API. Structure: `src/` contains the main logic, `openapi/` the API specs, `config/` configuration, `tests/` tests.
+Larafocus is a Laravel package that integrates with the FocusNFe API (Brazilian fiscal documents: NFSe, companies, webhooks, municipalities).
+
+**Requirements**: PHP 8.2+, Laravel 11 / 12 / 13.
+
+**Static analysis baselines**: PHPStan level 9, Psalm level 7 with taint analysis, 100% line coverage, 100% mutation score, 100% type coverage.
+
+**Layout** (Screaming Architecture — organized by FocusNFe domain, not by technical layer):
+
+```
+src/
+├── Focus.php                 # Facade (proxies to FocusManager)
+├── LarafocusServiceProvider.php
+├── Companies/                # Empresas endpoint (always hits production)
+│   └── DTO/ (+ Enums/)
+├── Nfse/                     # NFSe (create/get/cancel/email/hook)
+│   └── DTO/ (+ Enums/, Concerns/)
+├── Hooks/                    # Webhook management
+│   └── DTO/ (+ Enums/)
+├── Search/                   # Cities / services / tax codes
+│   └── Cities/
+├── Infrastructure/           # Humble boundary layer (HTTP, env, responses)
+│   ├── FocusManager.php      # Entry point, DI target of the Focus facade
+│   ├── Http.php              # readonly; wraps Illuminate HTTP client
+│   ├── FocusResponse.php
+│   ├── Environment.php       # enum: Sandbox | Production
+│   └── ContentType.php
+└── Shared/
+    ├── Undefined.php         # Sentinel enum for partial updates (see Gotchas)
+    ├── TypeCast.php
+    └── InvalidDtoException.php
+
+tests/Unit/                   # Pest; mirrors src/ one-to-one
+└── Security/                 # Dedicated tests for hardened boundaries
+openapi/                      # FocusNFe API specs (source of truth for DTOs)
+docs/security-audit-report.md # Latest threat model / findings
+```
+
+## Key Patterns & Gotchas
+
+- **`Undefined::Value` sentinel** — `FocusManager::config()` and `using()` use `Undefined::Value` as the default for every parameter to distinguish "not passed" from "passed as null". When adding new config options, follow the same pattern; never use `null` as "unset".
+- **`Focus::config()` vs `Focus::using()`** — `config()` mutates the singleton (persistent); `using()` returns a new instance (scoped override). Do not confuse them — they look similar but have very different side effects.
+- **`Companies` always hits production** — `FocusManager::companies()` ignores `LARAFOCUS_ENVIRONMENT` and uses the master token against the production endpoint. This is by design (FocusNFe has no sandbox for empresas).
+- **Sandbox `dry_run`** — In sandbox, `Companies::create()` and `update()` automatically append `?dry_run=1`. Preserve this behavior when adding new company operations.
+- **`resolveFileUrl()` is security-sensitive** — Validates `/` prefix, rejects `..` and null bytes. Any change must keep `tests/Unit/Security/ResolveFileUrlSecurityTest.php` green.
+- **DTOs accept arrays** — Public methods accept either a DTO or a raw array (auto-converted via `TypeCast`). Always validate on construction and throw `InvalidDtoException` — never return null, never silently coerce invalid data.
+- **`Http` is `readonly`** — The HTTP boundary is immutable; never add setters. Token must be non-empty (validated in constructor).
+- **OpenAPI specs are the contract** — When adding or changing DTOs, cross-check against `openapi/*.yaml`; those files are the source of truth for field names, types, and required attributes.
+
+## Testing
+
+- **Pest** (not raw PHPUnit). Base class: `tests/Unit/UnitTestCase.php`.
+- Test files mirror `src/` one-to-one; security-critical paths live in `tests/Unit/Security/`.
+- Mutation testing (`pest --mutate`) must stay at 100% — do not dismiss surviving mutants without understanding why.
+- New code **must** ship with tests covering the public API. Do not test private methods directly.
 
 ## Documentation
 
