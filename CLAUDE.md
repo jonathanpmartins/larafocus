@@ -58,6 +58,14 @@ src/
 │   ├── FocusResponse.php
 │   ├── Environment.php       # enum: Sandbox | Production
 │   └── ContentType.php
+├── Exceptions/               # Typed transport failures (see Gotchas)
+│   ├── CommunicationException.php        # abstract base: no definitive answer
+│   ├── RequestNotDeliveredException.php  # nothing reached Focus; retry is safe
+│   └── IndeterminateResultException.php  # may have been processed; reconcile
+├── Support/                  # Stateless helpers for the boundary
+│   ├── TransportFailureClassifier.php    # cURL errno -> typed exception
+│   ├── ResponseClassifier.php            # flags indeterminate responses
+│   └── BodySnippet.php                   # log-safe, truncated body excerpt
 └── Shared/
     ├── Undefined.php         # Sentinel enum for partial updates (see Gotchas)
     ├── TypeCast.php
@@ -77,12 +85,15 @@ docs/security-audit-report.md # Latest threat model / findings
 - **Sandbox `dry_run`** — In sandbox, `Companies::create()` and `update()` automatically append `?dry_run=1`. Preserve this behavior when adding new company operations.
 - **`resolveFileUrl()` is security-sensitive** — Validates `/` prefix, rejects `..` and null bytes. Any change must keep `tests/Unit/Security/ResolveFileUrlSecurityTest.php` green.
 - **DTOs accept arrays** — Public methods accept either a DTO or a raw array (auto-converted via `TypeCast`). Always validate on construction and throw `InvalidDtoException` — never return null, never silently coerce invalid data.
-- **`Http` is `readonly`** — The HTTP boundary is immutable; never add setters. Token must be non-empty (validated in constructor).
+- **`Http` is `readonly`** — The HTTP boundary is immutable; never add setters. Token must be non-empty (validated in constructor). Timeouts must be >= 1 (0 means "wait forever" in Guzzle).
+- **Two response channels — do not blur them** — A response that *arrived* is always a `FocusResponse`, including definitive rejections (4xx/408/429/3xx). Only when no trustworthy answer exists does `Http` throw a `Larafocus\Exceptions\CommunicationException`: `RequestNotDeliveredException` (nothing reached Focus, retry is safe) or `IndeterminateResultException` (may have been processed, reconcile via `nfse()->get($ref)`). When adding transport handling, bias to indeterminate: a false "not delivered" invites a blind retry that could duplicate a document.
 - **OpenAPI specs are the contract** — When adding or changing DTOs, cross-check against `openapi/*.yaml`; those files are the source of truth for field names, types, and required attributes.
 
 ## Testing
 
 - **Pest** (not raw PHPUnit). Base class: `tests/Unit/UnitTestCase.php`.
+- **The default HTTP fake shadows per-test fakes** — `UnitTestCase` registers `Http::fake(['*' => ...])` with a readable JSON body (an empty 2xx is treated as indeterminate). `Http::fake()` accumulates stubs and the *first* match wins, so a later `Http::fake([...])` in a test is silently ignored. To control a response, reset first: `Http::swap(new Illuminate\Http\Client\Factory)`.
+- **Mutation testing and `const`** — A class `const` declaration line does not register as covered, so a mutated constant surfaces as an *uncovered* mutant that no test can kill. Use a local variable (see `BodySnippet`) or inline the literal in a covered method. Same reason `match ($value)` is preferred over `match (true)`.
 - Test files mirror `src/` one-to-one; security-critical paths live in `tests/Unit/Security/`.
 - Mutation testing (`pest --mutate`) must stay at 100% — do not dismiss surviving mutants without understanding why.
 - New code **must** ship with tests covering the public API. Do not test private methods directly.

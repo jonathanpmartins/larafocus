@@ -22,6 +22,9 @@ class LarafocusServiceProvider extends ServiceProvider
             __DIR__.'/../config/larafocus.php', 'larafocus'
         );
 
-        $this->app->singleton(FocusManager::class, fn (): FocusManager => new FocusManager);
+        $this->app->singleton(FocusManager::class, fn (): FocusManager => new FocusManager(
+            timeout: config()->integer('larafocus.timeout'),
+            connectTimeout: config()->integer('larafocus.connect_timeout'),
+        ));
     }
 }

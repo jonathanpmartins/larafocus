@@ -15,6 +15,7 @@ class FocusManager
 {
     public function __construct(
         private int $timeout = 60,
+        private int $connectTimeout = 10,
         private ?Environment $environment = null,
         private ?string $token = null,
         private ?string $masterToken = null,
@@ -22,12 +23,17 @@ class FocusManager
 
     public function config(
         int|Undefined $timeout = Undefined::Value,
+        int|Undefined $connectTimeout = Undefined::Value,
         Environment|Undefined|null $environment = Undefined::Value,
         string|Undefined|null $token = Undefined::Value,
         string|Undefined|null $masterToken = Undefined::Value,
     ): self {
         if ($timeout !== Undefined::Value) {
             $this->timeout = $timeout;
+        }
+
+        if ($connectTimeout !== Undefined::Value) {
+            $this->connectTimeout = $connectTimeout;
         }
 
         if ($environment !== Undefined::Value) {
@@ -47,12 +53,14 @@ class FocusManager
 
     public function using(
         int|Undefined $timeout = Undefined::Value,
+        int|Undefined $connectTimeout = Undefined::Value,
         Environment|Undefined|null $environment = Undefined::Value,
         string|Undefined|null $token = Undefined::Value,
         string|Undefined|null $masterToken = Undefined::Value,
     ): self {
         return new self(
             timeout: $timeout !== Undefined::Value ? $timeout : $this->timeout,
+            connectTimeout: $connectTimeout !== Undefined::Value ? $connectTimeout : $this->connectTimeout,
             environment: $environment !== Undefined::Value ? $environment : $this->environment,
             token: $token !== Undefined::Value ? $token : $this->token,
             masterToken: $masterToken !== Undefined::Value ? $masterToken : $this->masterToken,
@@ -84,6 +92,7 @@ class FocusManager
                 baseUrl: $productionBaseUrl,
                 token: $this->masterToken ?? config()->string('larafocus.master_token'),
                 timeout: $this->timeout,
+                connectTimeout: $this->connectTimeout,
             ),
             $this->resolveEnvironment(),
         );
@@ -117,6 +126,7 @@ class FocusManager
             baseUrl: config()->string('larafocus.'.$environment->value.'.endpoint').$prefix,
             token: $this->token ?? config()->string('larafocus.'.$environment->value.'.token'),
             timeout: $this->timeout,
+            connectTimeout: $this->connectTimeout,
         );
     }
 

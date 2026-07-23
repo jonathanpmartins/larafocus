@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Larafocus\Infrastructure;
 
 use Illuminate\Http\Client\Response;
+use Larafocus\Support\BodySnippet;
 
 readonly class FocusResponse
 {
@@ -19,6 +20,19 @@ readonly class FocusResponse
         public array $errors,
         public Response $response,
     ) {}
+
+    /**
+     * Whether Focus reported the reference as non-existent (HTTP 404).
+     *
+     * After a timeout, an unambiguous 404 on `nfse()->get($ref)` proves the
+     * document was NOT emitted, so re-emitting the same `ref` is safe.
+     *
+     * @api
+     */
+    public function isNotFound(): bool
+    {
+        return $this->statusCode === 404;
+    }
 
     public static function fromResponse(Response $response): self
     {
@@ -59,21 +73,15 @@ readonly class FocusResponse
     /** @return array{codigo: string, mensagem: string} */
     private static function buildNonJsonError(Response $response): array
     {
-        $rawBody = trim($response->body());
+        $snippet = BodySnippet::of($response->body());
         $statusCode = (string) $response->status();
         $statusPhrase = self::statusPhrase($response->status());
 
-        if ($rawBody === '') {
+        if ($snippet === '') {
             return ['codigo' => $statusCode, 'mensagem' => $statusPhrase];
         }
 
-        $maxLength = 500;
-
-        $truncatedBody = mb_strlen($rawBody) > $maxLength
-            ? mb_substr($rawBody, 0, $maxLength).'…'
-            : $rawBody;
-
-        return ['codigo' => $statusCode, 'mensagem' => $statusPhrase.': '.$truncatedBody];
+        return ['codigo' => $statusCode, 'mensagem' => $statusPhrase.': '.$snippet];
     }
 
     private static function statusPhrase(int $statusCode): string

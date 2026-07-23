@@ -24,7 +24,17 @@ class UnitTestCase extends BaseTestCase
         $this->app->forgetInstance(FocusManager::class);
         \Larafocus\Focus::clearResolvedInstance(FocusManager::class);
 
-        Http::fake();
+        // A readable JSON body by default: an empty/non-JSON 2xx is treated as an
+        // indeterminate result, so tests that only assert the request was sent still
+        // receive a definitive FocusResponse.
+        //
+        // Heads up: Http::fake() accumulates stubs and the FIRST match wins, so this
+        // '*' stub shadows any Http::fake() a test registers later. To control the
+        // response (empty body, 5xx, a thrown failure), reset the client first:
+        //
+        //     Http::swap(new Illuminate\Http\Client\Factory);
+        //     Http::fake(['*' => Http::response('', 500)]);
+        Http::fake(['*' => Http::response(['status' => 'ok'])]);
     }
 
     protected function getPackageProviders($app): array

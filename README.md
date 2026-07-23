@@ -47,6 +47,8 @@ LARAFOCUS_MASTER_TOKEN=your-master-token
 | `LARAFOCUS_PREFIX` | API path prefix | `/v2` |
 | `LARAFOCUS_SANDBOX_ENDPOINT` | Sandbox base URL | `https://homologacao.focusnfe.com.br` |
 | `LARAFOCUS_PRODUCTION_ENDPOINT` | Production base URL | `https://api.focusnfe.com.br` |
+| `LARAFOCUS_TIMEOUT` | Total request timeout in seconds (emission can be slow) | `60` |
+| `LARAFOCUS_CONNECT_TIMEOUT` | Connection timeout in seconds (a dead host fails fast) | `10` |
 
 ## Usage
 
@@ -64,11 +66,12 @@ Focus::search();     // Municipality, service, and tax code search
 Every method returns a `FocusResponse` with:
 
 ```php
-$response->statusCode; // int — HTTP status code
-$response->success;    // bool — true if status < 400
-$response->data;       // array — parsed JSON response
-$response->errors;     // array — extracted errors (if any)
-$response->response;   // Illuminate\Http\Client\Response — raw response
+$response->statusCode;   // int — HTTP status code
+$response->success;      // bool — true if status < 400
+$response->data;         // array — parsed JSON response
+$response->errors;       // array — extracted errors (if any)
+$response->response;     // Illuminate\Http\Client\Response — raw response
+$response->isNotFound(); // bool — true when Focus reported the ref as non-existent (404)
 ```
 
 ### NFSe
@@ -260,6 +263,7 @@ Focus::using(
     environment: Environment::Production,
     token: 'custom-token',
     timeout: 30,
+    connectTimeout: 5,
 )->nfse()->get('ref-001');
 
 // Persistent change (mutates the singleton)
@@ -296,6 +300,44 @@ if (! $response->success) {
     }
 }
 ```
+
+### Transport failures and timeout reconciliation
+
+A response that *arrives* — including a definitive rejection such as `erro_autorizacao`,
+`404`, `408`, or `429` — is always returned as a `FocusResponse`. Only when no trustworthy
+answer is obtained does the client throw a typed transport exception, all extending
+`Larafocus\Exceptions\CommunicationException`:
+
+| Exception | Meaning | Safe action |
+|---|---|---|
+| `RequestNotDeliveredException` | The request never reached Focus (DNS, connect, or TLS failure). | Retry directly — nothing was emitted or cancelled. |
+| `IndeterminateResultException` | The request may have been processed (timeout, unreadable `2xx`, or a `5xx` on a write). | Reconcile before retrying — the outcome is unknown. |
+
+Because the `ref` deduplicates on Focus, reconciling with `get($ref)` never risks a duplicate:
+
+```php
+use Larafocus\Exceptions\IndeterminateResultException;
+use Larafocus\Exceptions\RequestNotDeliveredException;
+
+try {
+    $response = Focus::nfse()->create($reference, $payload);
+    // handle success / erro_autorizacao / processando_autorizacao
+} catch (RequestNotDeliveredException $e) {
+    // Nothing reached Focus — retrying the same call is safe.
+} catch (IndeterminateResultException $e) {
+    // It may have been emitted — reconcile by reference.
+    $lookup = Focus::nfse()->get($reference);
+
+    if ($lookup->isNotFound()) {
+        // Not emitted — re-emitting the same ref is safe.
+    } else {
+        // Emitted — a webhook/verify will complete it.
+    }
+}
+```
+
+The `IndeterminateResultException::$phase` property (`read`, `transfer`, `body`, …) records
+where the failure happened, for logging.
 
 ## Testing
 

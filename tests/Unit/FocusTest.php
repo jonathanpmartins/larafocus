@@ -352,3 +352,52 @@ test('resolveFileUrl via using does not mutate the singleton', function () {
     expect(Focus::resolveFileUrl('/v2/nfse/abc123.xml'))
         ->toBe('https://homologacao.focusnfe.com.br/v2/nfse/abc123.xml');
 });
+
+test('default connect timeout is 10 seconds', function () {
+    // Reflection: the connect timeout is not observable through Http::fake().
+    $nfse = Focus::nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'connectTimeout'))->getValue($http))->toBe(10);
+});
+
+test('manager constructor defaults timeout and connect timeout', function () {
+    $manager = new FocusManager;
+
+    expect((new ReflectionProperty($manager, 'timeout'))->getValue($manager))->toBe(60)
+        ->and((new ReflectionProperty($manager, 'connectTimeout'))->getValue($manager))->toBe(10);
+});
+
+test('config mutates the connect timeout', function () {
+    Focus::config(connectTimeout: 8);
+
+    $nfse = Focus::nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'connectTimeout'))->getValue($http))->toBe(8);
+});
+
+test('using inherits connect timeout from base instance', function () {
+    Focus::config(connectTimeout: 25);
+
+    $nfse = Focus::using(token: 'override')->nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'connectTimeout'))->getValue($http))->toBe(25);
+});
+
+test('using overrides connect timeout from base instance', function () {
+    Focus::config(connectTimeout: 25);
+
+    $nfse = Focus::using(connectTimeout: 3)->nfse();
+    $http = (new ReflectionProperty($nfse, 'http'))->getValue($nfse);
+
+    expect((new ReflectionProperty($http, 'connectTimeout'))->getValue($http))->toBe(3);
+});
+
+test('companies uses the configured connect timeout', function () {
+    $companies = Focus::using(connectTimeout: 9, masterToken: 'master')->companies();
+    $http = (new ReflectionProperty($companies, 'http'))->getValue($companies);
+
+    expect((new ReflectionProperty($http, 'connectTimeout'))->getValue($http))->toBe(9);
+});

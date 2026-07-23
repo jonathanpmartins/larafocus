@@ -137,8 +137,8 @@ test('fromResponse synthesizes error for non-json 500 with empty body', function
     ]);
 });
 
-test('fromResponse does not truncate body at exactly 500 characters', function () {
-    $body = str_repeat('y', 500);
+test('fromResponse does not truncate body at exactly 1024 characters', function () {
+    $body = str_repeat('y', 1024);
     $response = new Response(new Psr7Response(502, [], $body));
 
     $focusResponse = FocusResponse::fromResponse($response);
@@ -146,8 +146,8 @@ test('fromResponse does not truncate body at exactly 500 characters', function (
     expect($focusResponse->errors[0]['mensagem'])->toBe('Bad Gateway: '.$body);
 });
 
-test('fromResponse truncates body at 501 characters', function () {
-    $body = 'A'.str_repeat('x', 500);
+test('fromResponse truncates body at 1025 characters', function () {
+    $body = 'A'.str_repeat('x', 1024);
     $response = new Response(new Psr7Response(503, [], $body));
 
     $focusResponse = FocusResponse::fromResponse($response);
@@ -156,7 +156,7 @@ test('fromResponse truncates body at 501 characters', function () {
 
     expect($mensagem)->toStartWith('Service Unavailable: A')
         ->and($mensagem)->toEndWith('…')
-        ->and($mensagem)->toBe('Service Unavailable: '.mb_substr($body, 0, 500).'…');
+        ->and($mensagem)->toBe('Service Unavailable: '.mb_substr($body, 0, 1024).'…');
 });
 
 test('fromResponse treats whitespace-only body as empty', function () {
@@ -219,3 +219,14 @@ test('fromResponse prefers erros array over top-level codigo and mensagem', func
 
     expect($focusResponse->errors)->toBe($errors);
 });
+
+test('isNotFound is true for a 404', function () {
+    expect(FocusResponse::fromResponse(makeResponse(404))->isNotFound())->toBeTrue();
+});
+
+test('isNotFound is false for any other status', function (int $status) {
+    expect(FocusResponse::fromResponse(makeResponse($status))->isNotFound())->toBeFalse();
+})->with([
+    'ok (200)' => [200],
+    'unprocessable (422)' => [422],
+]);

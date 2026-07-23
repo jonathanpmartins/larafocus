@@ -37,3 +37,14 @@ test('service provider publishes config file', function () {
 test('prefix is set to v2', function () {
     expect(config('larafocus.prefix'))->toBe('/v2');
 });
+
+test('service provider injects configured timeouts into the manager', function () {
+    config()->set('larafocus.timeout', 33);
+    config()->set('larafocus.connect_timeout', 4);
+    app()->forgetInstance(\Larafocus\Infrastructure\FocusManager::class);
+
+    $manager = app(\Larafocus\Infrastructure\FocusManager::class);
+
+    expect((new ReflectionProperty($manager, 'timeout'))->getValue($manager))->toBe(33)
+        ->and((new ReflectionProperty($manager, 'connectTimeout'))->getValue($manager))->toBe(4);
+});
