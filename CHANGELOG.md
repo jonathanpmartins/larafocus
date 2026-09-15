@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-09-15
 
 ### Removed
 - **Breaking:** Laravel 11 support. Every `laravel/framework` 11.x release carries unpatched security advisories, so Composer refuses to install it by default and the CI matrix could no longer exercise it. `illuminate/http` and `illuminate/validation` now require `^12.0|^13.0`.

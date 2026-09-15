@@ -2,7 +2,7 @@
     "name": "jonathanpmartins/larafocus",
     "description": "Laravel Package for integration with FocusNFe API.",
     "license": "MIT",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "authors": [
         {
             "name": "Jonathan Martins",
