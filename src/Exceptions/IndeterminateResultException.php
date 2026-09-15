@@ -18,7 +18,7 @@ use Throwable;
  */
 final class IndeterminateResultException extends CommunicationException
 {
-    private const string TRANSPORT_MESSAGE = 'A resposta do Focus é indeterminada; reconcilie a operação antes de repetir.';
+    private const TRANSPORT_MESSAGE = 'A resposta do Focus é indeterminada; reconcilie a operação antes de repetir.';
 
     /**
      * @param  'body'|'connect'|'dns'|'read'|'tls'|'transfer'|null  $phase  The transport phase, when one is likely; null otherwise.
