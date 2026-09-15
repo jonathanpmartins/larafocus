@@ -10,7 +10,15 @@ use Larafocus\Companies\DTO\Enums\SmtpAutenticacao;
 use Larafocus\Companies\DTO\Enums\SmtpVerificacaoOpenssl;
 use Larafocus\Shared\TypeCast;
 
-/** @phpstan-type EmpresaRequestArray array{nome?: string|null, nome_fantasia?: string|null, cnpj?: string|null, cpf?: string|null, inscricao_estadual?: string|int|null, inscricao_municipal?: string|int|null, regime_tributario?: int|null, logradouro?: string|null, numero?: string|int|null, complemento?: string|null, bairro?: string|null, municipio?: string|null, cep?: string|int|null, uf?: string|null, telefone?: string|null, email?: string|null, habilita_nfe?: string|int|bool|null, habilita_nfce?: string|int|bool|null, habilita_nfse?: string|int|bool|null, habilita_nfsen_producao?: string|int|bool|null, habilita_nfsen_homologacao?: string|int|bool|null, habilita_cte?: string|int|bool|null, habilita_mdfe?: string|int|bool|null, habilita_nfcom?: string|int|bool|null, habilita_manifestacao?: string|int|bool|null, habilita_manifestacao_cte?: string|int|bool|null, habilita_nfsen_recebidas_producao?: string|int|bool|null, habilita_nfsen_recebidas_homologacao?: string|int|bool|null, enviar_email_destinatario?: string|int|bool|null, enviar_email_homologacao?: string|int|bool|null, discrimina_impostos?: string|int|bool|null, habilita_contingencia_offline_nfce?: string|int|bool|null, reaproveita_numero_nfce_contingencia?: string|int|bool|null, csc_nfce_producao?: string|null, id_token_nfce_producao?: string|int|null, csc_nfce_homologacao?: string|null, id_token_nfce_homologacao?: string|int|null, orientacao_danfe?: string|null, recibo_danfe?: string|int|bool|null, exibe_sempre_ipi_danfe?: string|int|bool|null, exibe_issqn_danfe?: string|int|bool|null, exibe_impostos_adicionais_danfe?: string|int|bool|null, exibe_rastro_danfe?: string|int|bool|null, exibe_unidade_tributaria_danfe?: string|int|bool|null, exibe_sempre_volumes_danfe?: string|int|bool|null, exibe_composicao_carga_mdfe?: string|int|bool|null, mostrar_danfse_badge?: string|int|bool|null, proximo_numero_nfe_producao?: string|null, proximo_numero_nfe_homologacao?: string|null, serie_nfe_producao?: string|null, serie_nfe_homologacao?: string|null, proximo_numero_nfce_producao?: string|null, proximo_numero_nfce_homologacao?: string|null, serie_nfce_producao?: string|null, serie_nfce_homologacao?: string|null, proximo_numero_nfse_producao?: string|null, proximo_numero_nfse_homologacao?: string|null, serie_nfse_producao?: string|null, serie_nfse_homologacao?: string|null, proximo_numero_nfsen_producao?: string|null, proximo_numero_nfsen_homologacao?: string|null, serie_nfsen_producao?: string|null, serie_nfsen_homologacao?: string|null, proximo_numero_cte_producao?: string|null, proximo_numero_cte_homologacao?: string|null, serie_cte_producao?: string|null, serie_cte_homologacao?: string|null, proximo_numero_cte_os_producao?: string|null, proximo_numero_cte_os_homologacao?: string|null, serie_cte_os_producao?: string|null, serie_cte_os_homologacao?: string|null, proximo_numero_mdfe_producao?: string|null, proximo_numero_mdfe_homologacao?: string|null, serie_mdfe_producao?: string|null, serie_mdfe_homologacao?: string|null, proximo_numero_nfcom_producao?: string|null, proximo_numero_nfcom_homologacao?: string|null, serie_nfcom_producao?: string|null, serie_nfcom_homologacao?: string|null, arquivo_certificado_base64?: string|null, senha_certificado?: string|null, arquivo_logo_base64?: string|null, delete_logo?: string|int|bool|null, nome_responsavel?: string|null, cpf_responsavel?: string|null, login_responsavel?: string|null, senha_responsavel?: string|null, senha_responsavel_preenchida?: string|int|bool|null, cpf_cnpj_contabilidade?: string|null, data_inicio_recebimento_nfe?: string|null, data_inicio_recebimento_cte?: string|null, smtp_endereco?: string|null, smtp_dominio?: string|null, smtp_porta?: string|int|null, smtp_autenticacao?: string|null, smtp_login?: string|null, smtp_senha?: string|null, smtp_remetente?: string|null, smtp_responder_para?: string|null, smtp_modo_verificacao_openssl?: string|null, smtp_habilita_starttls?: string|int|bool|null, smtp_ssl?: string|int|bool|null, smtp_tls?: string|int|bool|null, nfe_sincrono?: string|int|bool|null, nfe_sincrono_homologacao?: string|int|bool|null, mdfe_sincrono?: string|int|bool|null, mdfe_sincrono_homologacao?: string|int|bool|null} */
+/**
+ * inscricao_estadual, inscricao_municipal, numero and cep are strings even though the
+ * official FocusNFe docs list them as integer. Focus stores and returns them verbatim
+ * (verified with PUT /v2/empresas/{id}?dry_run=1), and real values carry leading zeros
+ * (CEP 01412000, IM 00054648), hyphens (IM 7469103-1) or letters (numero "APT 310").
+ * Casting them to int destroyed that information, so do not revert to ?int.
+ *
+ * @phpstan-type EmpresaRequestArray array{nome?: string|null, nome_fantasia?: string|null, cnpj?: string|null, cpf?: string|null, inscricao_estadual?: string|int|null, inscricao_municipal?: string|int|null, regime_tributario?: int|null, logradouro?: string|null, numero?: string|int|null, complemento?: string|null, bairro?: string|null, municipio?: string|null, cep?: string|int|null, uf?: string|null, telefone?: string|null, email?: string|null, habilita_nfe?: string|int|bool|null, habilita_nfce?: string|int|bool|null, habilita_nfse?: string|int|bool|null, habilita_nfsen_producao?: string|int|bool|null, habilita_nfsen_homologacao?: string|int|bool|null, habilita_cte?: string|int|bool|null, habilita_mdfe?: string|int|bool|null, habilita_nfcom?: string|int|bool|null, habilita_manifestacao?: string|int|bool|null, habilita_manifestacao_cte?: string|int|bool|null, habilita_nfsen_recebidas_producao?: string|int|bool|null, habilita_nfsen_recebidas_homologacao?: string|int|bool|null, enviar_email_destinatario?: string|int|bool|null, enviar_email_homologacao?: string|int|bool|null, discrimina_impostos?: string|int|bool|null, habilita_contingencia_offline_nfce?: string|int|bool|null, reaproveita_numero_nfce_contingencia?: string|int|bool|null, csc_nfce_producao?: string|null, id_token_nfce_producao?: string|int|null, csc_nfce_homologacao?: string|null, id_token_nfce_homologacao?: string|int|null, orientacao_danfe?: string|null, recibo_danfe?: string|int|bool|null, exibe_sempre_ipi_danfe?: string|int|bool|null, exibe_issqn_danfe?: string|int|bool|null, exibe_impostos_adicionais_danfe?: string|int|bool|null, exibe_rastro_danfe?: string|int|bool|null, exibe_unidade_tributaria_danfe?: string|int|bool|null, exibe_sempre_volumes_danfe?: string|int|bool|null, exibe_composicao_carga_mdfe?: string|int|bool|null, mostrar_danfse_badge?: string|int|bool|null, proximo_numero_nfe_producao?: string|null, proximo_numero_nfe_homologacao?: string|null, serie_nfe_producao?: string|null, serie_nfe_homologacao?: string|null, proximo_numero_nfce_producao?: string|null, proximo_numero_nfce_homologacao?: string|null, serie_nfce_producao?: string|null, serie_nfce_homologacao?: string|null, proximo_numero_nfse_producao?: string|null, proximo_numero_nfse_homologacao?: string|null, serie_nfse_producao?: string|null, serie_nfse_homologacao?: string|null, proximo_numero_nfsen_producao?: string|null, proximo_numero_nfsen_homologacao?: string|null, serie_nfsen_producao?: string|null, serie_nfsen_homologacao?: string|null, proximo_numero_cte_producao?: string|null, proximo_numero_cte_homologacao?: string|null, serie_cte_producao?: string|null, serie_cte_homologacao?: string|null, proximo_numero_cte_os_producao?: string|null, proximo_numero_cte_os_homologacao?: string|null, serie_cte_os_producao?: string|null, serie_cte_os_homologacao?: string|null, proximo_numero_mdfe_producao?: string|null, proximo_numero_mdfe_homologacao?: string|null, serie_mdfe_producao?: string|null, serie_mdfe_homologacao?: string|null, proximo_numero_nfcom_producao?: string|null, proximo_numero_nfcom_homologacao?: string|null, serie_nfcom_producao?: string|null, serie_nfcom_homologacao?: string|null, arquivo_certificado_base64?: string|null, senha_certificado?: string|null, arquivo_logo_base64?: string|null, delete_logo?: string|int|bool|null, nome_responsavel?: string|null, cpf_responsavel?: string|null, login_responsavel?: string|null, senha_responsavel?: string|null, senha_responsavel_preenchida?: string|int|bool|null, cpf_cnpj_contabilidade?: string|null, data_inicio_recebimento_nfe?: string|null, data_inicio_recebimento_cte?: string|null, smtp_endereco?: string|null, smtp_dominio?: string|null, smtp_porta?: string|int|null, smtp_autenticacao?: string|null, smtp_login?: string|null, smtp_senha?: string|null, smtp_remetente?: string|null, smtp_responder_para?: string|null, smtp_modo_verificacao_openssl?: string|null, smtp_habilita_starttls?: string|int|bool|null, smtp_ssl?: string|int|bool|null, smtp_tls?: string|int|bool|null, nfe_sincrono?: string|int|bool|null, nfe_sincrono_homologacao?: string|int|bool|null, mdfe_sincrono?: string|int|bool|null, mdfe_sincrono_homologacao?: string|int|bool|null}
+ */
 readonly class EmpresaRequest
 {
     public function __construct(
@@ -19,17 +27,17 @@ readonly class EmpresaRequest
         public ?string $nome_fantasia = null,
         public ?string $cnpj = null,
         public ?string $cpf = null,
-        public ?int $inscricao_estadual = null,
-        public ?int $inscricao_municipal = null,
+        public ?string $inscricao_estadual = null,
+        public ?string $inscricao_municipal = null,
         public ?RegimeTributario $regime_tributario = null,
 
         // Endereco
         public ?string $logradouro = null,
-        public ?int $numero = null,
+        public ?string $numero = null,
         public ?string $complemento = null,
         public ?string $bairro = null,
         public ?string $municipio = null,
-        public ?int $cep = null,
+        public ?string $cep = null,
         public ?string $uf = null,
 
         // Contato
@@ -158,17 +166,17 @@ readonly class EmpresaRequest
             nome_fantasia: $data['nome_fantasia'] ?? null,
             cnpj: $data['cnpj'] ?? null,
             cpf: $data['cpf'] ?? null,
-            inscricao_estadual: TypeCast::nullableInt($data['inscricao_estadual'] ?? null),
-            inscricao_municipal: TypeCast::nullableInt($data['inscricao_municipal'] ?? null),
+            inscricao_estadual: TypeCast::nullableString($data['inscricao_estadual'] ?? null),
+            inscricao_municipal: TypeCast::nullableString($data['inscricao_municipal'] ?? null),
             regime_tributario: isset($data['regime_tributario'])
                 ? RegimeTributario::from($data['regime_tributario'])
                 : null,
             logradouro: $data['logradouro'] ?? null,
-            numero: TypeCast::nullableInt($data['numero'] ?? null),
+            numero: TypeCast::nullableString($data['numero'] ?? null),
             complemento: $data['complemento'] ?? null,
             bairro: $data['bairro'] ?? null,
             municipio: $data['municipio'] ?? null,
-            cep: TypeCast::nullableInt($data['cep'] ?? null),
+            cep: TypeCast::nullableString($data['cep'] ?? null),
             uf: $data['uf'] ?? null,
             telefone: $data['telefone'] ?? null,
             email: $data['email'] ?? null,

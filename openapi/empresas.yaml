@@ -293,11 +293,11 @@ components:
         cpf:
           type: string
         inscricao_estadual:
-          type: integer
-          description: Inscrição estadual
+          type: string
+          description: Inscrição estadual. Enviado e armazenado verbatim pela API (preserva zeros à esquerda, hífens e letras).
         inscricao_municipal:
-          type: integer
-          description: Inscrição municipal
+          type: string
+          description: Inscrição municipal. Enviado e armazenado verbatim pela API (preserva zeros à esquerda, hífens e letras).
         regime_tributario:
           type: integer
           enum: [1, 2, 3, 4]
@@ -313,8 +313,8 @@ components:
           type: string
           description: Logradouro do endereço
         numero:
-          type: integer
-          description: Número do endereço
+          type: string
+          description: Número do endereço. Enviado e armazenado verbatim pela API (preserva zeros à esquerda, hífens e letras).
         complemento:
           type: string
           description: Complemento do endereço
@@ -325,8 +325,8 @@ components:
           type: string
           description: Município do endereço
         cep:
-          type: integer
-          description: CEP do endereço
+          type: string
+          description: CEP do endereço. Enviado e armazenado verbatim pela API (preserva zeros à esquerda, hífens e letras).
         uf:
           type: string
           description: UF do endereço
@@ -691,8 +691,10 @@ components:
       type: object
       description: |
         Objeto de resposta da empresa. Alguns campos que são enviados como integer
-        no request (inscricao_estadual, inscricao_municipal, numero, cep,
-        regime_tributario, id_token_nfce_*, smtp_porta) são retornados como string.
+        no request (regime_tributario, id_token_nfce_*, smtp_porta) são retornados
+        como string. inscricao_estadual, inscricao_municipal, numero e cep são
+        armazenados e devolvidos verbatim; a documentação oficial os lista como
+        integer, mas a API não normaliza o valor.
       properties:
         # ── Identificação ──
         id:

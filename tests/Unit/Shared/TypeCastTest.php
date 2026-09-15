@@ -120,3 +120,17 @@ test('nullableInt throws on non-numeric string', function () {
 test('nullableInt casts negative numeric string', function () {
     expect(TypeCast::nullableInt('-5'))->toBe(-5);
 });
+
+// nullableString
+
+test('nullableString returns null for null', function () {
+    expect(TypeCast::nullableString(null))->toBeNull();
+});
+
+test('nullableString keeps a string verbatim, leading zeros included', function () {
+    expect(TypeCast::nullableString('025025'))->toBe('025025');
+});
+
+test('nullableString casts a native int to string', function () {
+    expect(TypeCast::nullableString(42))->toBe('42');
+});

@@ -18,6 +18,11 @@ final class TypeCast
         return $value !== null ? filter_var($value, FILTER_VALIDATE_BOOLEAN) : null;
     }
 
+    public static function nullableString(string|int|null $value): ?string
+    {
+        return $value !== null ? (string) $value : null;
+    }
+
     public static function nullableInt(string|int|null $value): ?int
     {
         if ($value === null) {

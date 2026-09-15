@@ -84,13 +84,13 @@ test('toArray includes boolean false values', function () {
 
 test('toArray includes integer zero values', function () {
     $request = new EmpresaRequest(
-        numero: 0,
-        cep: 0,
+        id_token_nfce_producao: 0,
+        smtp_porta: 0,
     );
 
     expect($request->toArray())->toBe([
-        'numero' => 0,
-        'cep' => 0,
+        'id_token_nfce_producao' => 0,
+        'smtp_porta' => 0,
     ]);
 });
 
@@ -145,18 +145,40 @@ test('fromArray casts string values for bool fields', function () {
 
 test('fromArray casts string values for int fields', function () {
     $request = EmpresaRequest::fromArray([
-        'inscricao_estadual' => '123456',
-        'numero' => '100',
-        'cep' => '12345678',
         'smtp_porta' => '587',
         'id_token_nfce_producao' => '1',
     ]);
 
-    expect($request->inscricao_estadual)->toBe(123456)
-        ->and($request->numero)->toBe(100)
-        ->and($request->cep)->toBe(12345678)
-        ->and($request->smtp_porta)->toBe(587)
+    expect($request->smtp_porta)->toBe(587)
         ->and($request->id_token_nfce_producao)->toBe(1);
+});
+
+test('fromArray keeps registrations, number and zipcode verbatim', function () {
+    $request = EmpresaRequest::fromArray([
+        'inscricao_estadual' => '0123456',
+        'inscricao_municipal' => '7469103-1',
+        'numero' => 'APT 310',
+        'cep' => '01412000',
+    ]);
+
+    expect($request->inscricao_estadual)->toBe('0123456')
+        ->and($request->inscricao_municipal)->toBe('7469103-1')
+        ->and($request->numero)->toBe('APT 310')
+        ->and($request->cep)->toBe('01412000');
+});
+
+test('fromArray accepts integers for registrations, number and zipcode', function () {
+    $request = EmpresaRequest::fromArray([
+        'inscricao_estadual' => 123456,
+        'inscricao_municipal' => 654321,
+        'numero' => 100,
+        'cep' => 12345678,
+    ]);
+
+    expect($request->inscricao_estadual)->toBe('123456')
+        ->and($request->inscricao_municipal)->toBe('654321')
+        ->and($request->numero)->toBe('100')
+        ->and($request->cep)->toBe('12345678');
 });
 
 test('round trip fromArray toArray preserves data for all fields', function () {
@@ -166,17 +188,17 @@ test('round trip fromArray toArray preserves data for all fields', function () {
         'nome_fantasia' => 'Empresa Teste',
         'cnpj' => '12345678000195',
         'cpf' => '12345678901',
-        'inscricao_estadual' => 123456,
-        'inscricao_municipal' => 654321,
+        'inscricao_estadual' => '0123456',
+        'inscricao_municipal' => '0654321',
         'regime_tributario' => 1,
 
         // Endereco
         'logradouro' => 'Rua Teste',
-        'numero' => 100,
+        'numero' => 'SN',
         'complemento' => 'Sala 1',
         'bairro' => 'Centro',
         'municipio' => 'Sao Paulo',
-        'cep' => 12345678,
+        'cep' => '01234567',
         'uf' => 'SP',
 
         // Contato

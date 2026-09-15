@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Breaking:** `EmpresaRequest::$inscricao_estadual`, `$inscricao_municipal`, `$numero` and `$cep` are now `?string` instead of `?int`. Focus stores these fields verbatim, so the `int` cast dropped leading zeros (CEP `01412000` became `1412000`, IM `00054648` became `54648`), truncated at hyphens (IM `7469103-1` became `7469103`) and rejected non-numeric street numbers (`SN`, `APT 310`). Arrays passed to `fromArray()`, `create()` or `update()` may still carry integers; they are converted to strings. Code that builds the DTO through the constructor must now pass strings, and reading these properties yields a string.
+
 ## [0.1.0] - 2026-03-11
 
 ### Added
