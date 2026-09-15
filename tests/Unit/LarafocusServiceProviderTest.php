@@ -1,14 +1,16 @@
 <?php
 
+use Illuminate\Support\ServiceProvider;
+use Larafocus\Infrastructure\FocusManager;
 use Larafocus\LarafocusServiceProvider;
 
 covers(LarafocusServiceProvider::class);
 
 test('service provider registers singleton', function () {
-    $focus1 = app(\Larafocus\Infrastructure\FocusManager::class);
-    $focus2 = app(\Larafocus\Infrastructure\FocusManager::class);
+    $focus1 = app(FocusManager::class);
+    $focus2 = app(FocusManager::class);
 
-    expect($focus1)->toBeInstanceOf(\Larafocus\Infrastructure\FocusManager::class)
+    expect($focus1)->toBeInstanceOf(FocusManager::class)
         ->and($focus1)->toBe($focus2);
 });
 
@@ -19,7 +21,7 @@ test('service provider merges config', function () {
 });
 
 test('service provider publishes config file', function () {
-    $publishes = \Illuminate\Support\ServiceProvider::$publishes;
+    $publishes = ServiceProvider::$publishes;
 
     $found = false;
     foreach ($publishes as $provider => $paths) {
@@ -41,9 +43,9 @@ test('prefix is set to v2', function () {
 test('service provider injects configured timeouts into the manager', function () {
     config()->set('larafocus.timeout', 33);
     config()->set('larafocus.connect_timeout', 4);
-    app()->forgetInstance(\Larafocus\Infrastructure\FocusManager::class);
+    app()->forgetInstance(FocusManager::class);
 
-    $manager = app(\Larafocus\Infrastructure\FocusManager::class);
+    $manager = app(FocusManager::class);
 
     expect((new ReflectionProperty($manager, 'timeout'))->getValue($manager))->toBe(33)
         ->and((new ReflectionProperty($manager, 'connectTimeout'))->getValue($manager))->toBe(4);

@@ -115,7 +115,7 @@ test('nullableInt preserves native int', function () {
 
 test('nullableInt throws on non-numeric string', function () {
     TypeCast::nullableInt('abc');
-})->throws(\InvalidArgumentException::class, "Cannot cast non-numeric string 'abc' to int");
+})->throws(InvalidArgumentException::class, "Cannot cast non-numeric string 'abc' to int");
 
 test('nullableInt casts negative numeric string', function () {
     expect(TypeCast::nullableInt('-5'))->toBe(-5);

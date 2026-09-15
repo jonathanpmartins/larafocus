@@ -10,7 +10,7 @@ Manage NFSe (electronic service invoices), companies, webhooks, and search munic
 ## Requirements
 
 - PHP 8.2+
-- Laravel 11 or 12
+- Laravel 12 or 13
 - Extensions: `json`, `curl`
 
 ## Installation

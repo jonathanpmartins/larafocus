@@ -1,11 +1,12 @@
 <?php
 
 use Larafocus\Focus;
+use Larafocus\Search;
 use Larafocus\Search\Cities;
 use Larafocus\Search\Cities\Services;
 use Larafocus\Search\Cities\TaxCodes;
 
-covers(Cities::class, \Larafocus\Search::class);
+covers(Cities::class, Search::class);
 
 test('list method', function () {
     $response = Focus::search()->cities()->list();

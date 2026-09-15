@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **Breaking:** Laravel 11 support. Every `laravel/framework` 11.x release carries unpatched security advisories, so Composer refuses to install it by default and the CI matrix could no longer exercise it. `illuminate/http` and `illuminate/validation` now require `^12.0|^13.0`.
+
 ### Changed
 - **Breaking:** `EmpresaRequest::$inscricao_estadual`, `$inscricao_municipal`, `$numero` and `$cep` are now `?string` instead of `?int`. Focus stores these fields verbatim, so the `int` cast dropped leading zeros (CEP `01412000` became `1412000`, IM `00054648` became `54648`), truncated at hyphens (IM `7469103-1` became `7469103`) and rejected non-numeric street numbers (`SN`, `APT 310`). Arrays passed to `fromArray()`, `create()` or `update()` may still carry integers; they are converted to strings. Code that builds the DTO through the constructor must now pass strings, and reading these properties yields a string.
 

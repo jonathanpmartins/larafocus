@@ -15,7 +15,7 @@ Always run before considering the work done:
 ./vendor/bin/pest --type-coverage --min=100 # runs type coverage tests
 ./vendor/bin/rector --dry-run # runs rector quality checks
 ./vendor/bin/phpstan analyse # run static analysis check
-./vendor/bin/psalm --taint-analysis # security analysis
+# ./vendor/bin/psalm --taint-analysis # security analysis — disabled until vimeo/psalm#11958 is fixed: Psalm 6/7 crash on the `@phpstan-this-out` docblock Laravel >= 13.32 ships in Collection.php
 ./vendor/bin/pint -p # runs the pint format rules
 
 # if any quality checks changed any file, full suite need to be run again!
@@ -24,7 +24,6 @@ Always run before considering the work done:
 # type-coverage
 # rector
 # phpstan
-# psalm
 # pint
 ```
 
@@ -34,7 +33,7 @@ Type coverage must remain at 100%. Any new or changed code must include complete
 
 Larafocus is a Laravel package that integrates with the FocusNFe API (Brazilian fiscal documents: NFSe, companies, webhooks, municipalities).
 
-**Requirements**: PHP 8.2+, Laravel 11 / 12 / 13.
+**Requirements**: PHP 8.2+, Laravel 12 / 13.
 
 **Static analysis baselines**: PHPStan level 9, Psalm level 7 with taint analysis, 100% line coverage, 100% mutation score, 100% type coverage.
 

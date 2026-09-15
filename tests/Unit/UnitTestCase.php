@@ -4,8 +4,10 @@ namespace Tests\Unit;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Larafocus\Focus;
 use Larafocus\Infrastructure\FocusManager;
 use Larafocus\Infrastructure\FocusResponse;
+use Larafocus\LarafocusServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
@@ -22,7 +24,7 @@ class UnitTestCase extends BaseTestCase
         $this->app['config']->set('larafocus.master_token', env('LARAFOCUS_MASTER_TOKEN', 'test-master-token'));
 
         $this->app->forgetInstance(FocusManager::class);
-        \Larafocus\Focus::clearResolvedInstance(FocusManager::class);
+        Focus::clearResolvedInstance(FocusManager::class);
 
         // A readable JSON body by default: an empty/non-JSON 2xx is treated as an
         // indeterminate result, so tests that only assert the request was sent still
@@ -39,7 +41,7 @@ class UnitTestCase extends BaseTestCase
 
     protected function getPackageProviders($app): array
     {
-        return [\Larafocus\LarafocusServiceProvider::class];
+        return [LarafocusServiceProvider::class];
     }
 
     public function makePath(string $path): string

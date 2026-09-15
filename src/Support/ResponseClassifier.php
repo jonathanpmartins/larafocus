@@ -6,12 +6,13 @@ namespace Larafocus\Support;
 
 use Illuminate\Http\Client\Response;
 use Larafocus\Exceptions\IndeterminateResultException;
+use Larafocus\Infrastructure\FocusResponse;
 
 /**
  * Detects the two responses that arrived but whose outcome cannot be trusted, and
  * raises {@see IndeterminateResultException} for them. Every other response — including
  * definitive provider rejections (4xx/429/408) and redirects (3xx) — is left untouched
- * so the caller can surface it as a normal {@see \Larafocus\Infrastructure\FocusResponse}.
+ * so the caller can surface it as a normal {@see FocusResponse}.
  *
  * Only meaningful for JSON responses; callers must gate non-JSON content types out.
  */

@@ -28,8 +28,8 @@
         "ext-json": "*",
         "ext-curl": "*",
         "guzzlehttp/guzzle": "^7.0",
-        "illuminate/http": "^11.0|^12.0|^13.0",
-        "illuminate/validation": "^11.0|^12.0|^13.0"
+        "illuminate/http": "^12.0|^13.0",
+        "illuminate/validation": "^12.0|^13.0"
     },
     "require-dev": {
         "pestphp/pest": "^3.0",
@@ -102,14 +102,12 @@
             "@quality:types",
             "@quality:rector",
             "@quality:phpstan",
-            "@quality:psalm",
             "@quality:pint",
             "@quality:test",
             "@quality:mutate",
             "@quality:types",
             "@quality:rector",
             "@quality:phpstan",
-            "@quality:psalm",
             "@quality:pint"
         ]
     }
